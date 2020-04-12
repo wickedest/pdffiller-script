@@ -10,12 +10,14 @@ const log = require('debug')('pdffiller-engine');
 pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatten);
 
 /**
- * Creates a form.
+ * Creates a fillable form from a PDF.
  */
 class Form {
 	/**
 	 * Initialize the form.  The `map` and `config` can be a string or an
 	 * object.  If it is a string, then it will be read in as a YAML file.
+	 * The `map` was previously generated from a PDF document using the
+	 * {@link map} function.
 	 *
 	 * @param {string} formName - A unique name for the form.
 	 * @param {string|object} map - The map generated from {@link map}.

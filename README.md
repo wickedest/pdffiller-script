@@ -31,4 +31,4 @@ Each input field in the example filled PDF file has been assigned an incremental
 
 ## API
 
-The API can be found in [docs](docs/API.md).
+The [Quick Start](docs/README.md) and API can be found in [docs](docs/API.md).
