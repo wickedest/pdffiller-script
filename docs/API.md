@@ -2,7 +2,7 @@
 
 <dl>
 <dt><a href="#Form">Form</a></dt>
-<dd><p>Creates a form.</p>
+<dd><p>Creates a fillable form from a PDF.</p>
 </dd>
 </dl>
 
@@ -17,7 +17,7 @@
 <a name="Form"></a>
 
 ## Form
-Creates a form.
+Creates a fillable form from a PDF.
 
 **Kind**: global class  
 
@@ -31,6 +31,8 @@ Creates a form.
 ### form.init(formName, map, config)
 Initialize the form.  The `map` and `config` can be a string or an
 object.  If it is a string, then it will be read in as a YAML file.
+The `map` was previously generated from a PDF document using the
+[map](#map) function.
 
 **Kind**: instance method of [<code>Form</code>](#Form)  
 **Access**: public  
