@@ -1,0 +1,45 @@
+{
+  "name": "pdffiller-engine",
+  "version": "0.1.0-0",
+  "description": "A configurable scripting engine for filling PDF forms.",
+  "main": "src/index.js",
+  "keywords": [
+    "pdf",
+    "filler"
+  ],
+  "author": {
+    "name": "Jamie Peabody",
+    "email": "jamie.peabody@gmail.com",
+    "url": "http://mergely.com"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": ">=10"
+  },
+  "dependencies": {
+    "chalk": "^4.0.0",
+    "debug": "^4.1.1",
+    "js-yaml": "^3.13.1",
+    "pdffiller": "0.0.11",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "jsdoc-to-markdown": "^5.0.3",
+    "mocha": "^7.1.1",
+    "mock-require": "^3.0.3",
+    "nyc": "^15.0.1",
+    "simple-mock": "^0.8.0"
+  },
+  "nyc": {
+    "all": true,
+    "reporter": [ "lcov", "text-summary" ]
+  },
+  "scripts": {
+    "build": "npm run build:lint && npm run test && npm run build:doc",
+    "build:lint": "eslint .",
+    "build:doc": "npx jsdoc2md src/*.js > docs/API.md",
+    "test": "nyc mocha"
+  }
+}

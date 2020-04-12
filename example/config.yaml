@@ -1,0 +1,6 @@
+identity:
+  firstName: Joe
+  lastName: Bloggs
+  middleName: Adam
+  ssn: 012-34-5678
+filingStatus: single

@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+const chalk = require('chalk');
+const engine = require('..');
+
+const { argv } = require('yargs')
+	.command(
+		'* <source> [-m map] [-f filler] [-i input] [-o output]',
+		'Fill a PDF form.',
+		(yargs) => {
+			yargs.positional('source', {
+				describe: 'The PDF file to fill.',
+				type: 'string',
+				required: true
+			}).alias(
+				'i', 'input'
+			).describe(
+				'i', 'The inputs file.'
+			).required(
+				'i', true
+			).alias(
+				'm', 'map'
+			).describe(
+				'm', 'The map file.'
+			).required(
+				'm', true
+			).alias(
+				'f', 'filler'
+			).describe(
+				'f', 'The form-filler file.'
+			).required(
+				'f', true
+			).alias(
+				'o', 'output'
+			).describe(
+				'o', 'The output file.'
+			).default(
+				'o', 'output.pdf'
+			).alias(
+				'v', 'version'
+			).alias(
+				'h', 'help'
+			)
+		}
+	)
+	.help()
+	.strict();
+
+// pdfFile, mapFile, inputsFile, fillerFile
+engine.fillForm(argv.source, argv.map, argv.input, argv.filler, {
+	output: argv.output
+})
+.then(result => {
+	console.log(`\
+Done\
+`);
+}).catch(err => {
+	console.error(err);
+});

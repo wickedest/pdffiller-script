@@ -1,0 +1,29 @@
+filing.status:
+  value:
+    ${ctx.filingStatus}
+  calculate: |
+    (ctx, value) => {
+      switch (value) {
+        case 'single':
+          return { field: '0', fill: '1' }
+        case 'married filing jointly':
+          return { field: '1', fill: '2' }
+        case 'single':
+          return { field: '2', fill: '3' }
+        case 'single':
+          return { field: '3', fill: '4' }
+        case 'single':
+          return { field: '4', fill: '5' }
+        default:
+          throw new Error(`unknown filingStatus: ${value}`);
+      }
+    }
+
+your.first.name.and.middle.initial:
+  6: "${ctx.identity.firstName}${ctx.identity.middleName ? ` ${ctx.identity.middleName[0]}` : ''}"
+
+last.name:
+  7: ${ctx.identity.lastName}
+
+social.security.number:
+  8: ${strNoDash(ctx.identity.ssn)}

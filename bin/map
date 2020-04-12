@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+const chalk = require('chalk');
+const engine = require('..');
+
+const { argv } = require('yargs')
+	.command(
+		'* <source> [-o out] [-n name] [--example]',
+		'Generate a form template from a PDF file.',
+		(yargs) => {
+			yargs.positional('source', {
+				describe: 'The PDF source file.',
+				type: 'string',
+				required: true
+			}).alias(
+				'o', 'out'
+			).alias(
+				'v', 'version'
+			).alias(
+				'n', 'name'
+			).describe(
+				'n', 'The name of YAML template file to generate.  Defaults to the basename of the PDF.'
+			).describe(
+				'o', 'The output directory.'
+			).default(
+				'o', '.'
+			).boolean(
+				'example'
+			).describe(
+				'example', 'Generate an example PDF with the form filled out.'
+			).default(
+				'example', true
+			).alias(
+				'h', 'help'
+			)
+		}
+	)
+	.help()
+	.strict();
+
+engine.map(argv.source, {
+	dir: argv.out,
+	name: argv.name,
+	example: argv.example
+}).then(result => {
+	console.log(chalk.cyan('created map:', result.map));
+	if (result.filled) {
+		console.log(chalk.cyan('filled example:', result.filled));
+		console.log(chalk.cyan('filler example:', result.filler));
+		console.log(chalk.cyan('config example:', result.config));
+		console.log(`\
+The example PDF file has been filled out with unique integer ID that correlate
+to the map file (field.ID: integer).  You can visually inspect the example PDF
+aid in identifying the fields you wish to fill.\
+`);
+	}
+}).catch(err => {
+	console.error(err);
+});
