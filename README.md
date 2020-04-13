@@ -1,33 +1,91 @@
-# pdffiller-engine
+# pdffiller-script
 
 Scripted PDF form filling.
 
 ## Install
 
+To install `pdffiller-script` to use the module API.
+
 ```bash
-$ npm install pdffiller-engine
+$ npm install pdffiller-script
 ```
 
 ## CLI usage
 
 ### Generate map file and examples
 
-Parse the PDF and generate example files:
+Parse the PDF and generate the map file, and example files to aid in form filling:
 
 ```bash
-$ npx pdffiller-engine map mypdf.pdf
+$ npx pdffiller-script map mypdf.pdf
 ```
 
-The following files are generated:
+This command generates `mypdf-map.yaml` which will later be fed into the CLI for filling out the PDF form.  It also generates a number of example files to aid in form filling.
 
-* `mypdf-filled.pdf`: The `mypdf.pdf` with each field given an incremental index value.  Useful because it usually necessary to visually identify input fields directly from the form.
-* `mypdf-filler.yaml`: An example form filler script that allows you to dynamically assign values to the PDF form input fields.
-* `mypdf-inputs`: An example inputs file that is accessible via the form filler script as `ctx`.
-* `mypdf-map.yaml`: 
+<a name="map-file"></a>
+**`mypdf-map.yaml`**: Maps input fields to integer values.  Referred to as the "map".
 
-## Example filled PDF
+<a name="example-script"></a>
+**`mypdf-example-script.yaml`**: An example form filler script.  Referred to as the "filler script".  Fills all fields to "todo" (values read from the config file).  :warning: *refer to filler doc*.
 
-Each input field in the example filled PDF file has been assigned an incremental index value in the order in which fields are discovered.  The first field my have the unique ID, "topmostForm[0].UserDetails.f1_01[0]".  This field ID would be mapped to `0`, and the `"0"` value will be filled in the PDF.
+<a name="example-config-file"></a>
+**`mypdf-example-config.yaml`**: An example configuration that sets every value to "todo".  :warning: *refer to config doc*.
+
+<a name="example-filled-pdf"></a>
+**`mypdf-example-filled.pdf`**: The PDF file filled with each field containing an incremental integer value for easier identification of fields to fill.
+
+### Fill a PDF
+
+If you wish, you can modify `mypdf-example-config.yaml` and change a few values.  Ultimately, you will create custom config and [script files](#scripted-pdf-form-filling).  Then, run the filler script and produce a PDF:
+
+```bash
+$ npx pdffiller-script fill mypdf.pdf \
+ --map mypdf-map.yaml\
+ --config mypdf-example-config.yaml\
+ --filler mypdf-example-filler.yaml\
+ --out output.pdf
+```
+
+## Scripted PDF form filling
+
+The `pdffiller-script` uses [pdffiller](https://www.npmjs.com/package/pdffiller) to interact with PDF forms, which makes it super easy to fill forms.  However, not all forms have friendly keys.  For example, the [USA IRS f1040](https://www.irs.gov/pub/irs-pdf/f1040.pdf) forms have keys that are not very user friendly, making correlating the field IDs to the form extremely difficult.  Furthermore, they are different on every form, there are lots of forms, and lots of fields.  If you were to use [pdffiller](https://www.npmjs.com/package/pdffiller), you would have quite a job.  The  `pdffiller-script`  simplifies that by employing a mapping system that uniquely identifies fields, and providing a configurable and scriptable interface for filling PDF forms.
+
+For example, take two fields from the [f1040](https://www.irs.gov/pub/irs-pdf/f1040.pdf) form.
+
+![Image of two empty frields from f1040 PDF](./images/f1040-empty-fields.png)
+
+The two fields actually have these IDs:
+
+![Image of two empty frields from f1040 PDF](./images/f1040-field-ids.png)
+
+These two fields exist on many (if not every) PDF tax form, and they have different keys.  The idea behind `pdffiller-script` will abstract these fields by giving each field in a form a unique integer ID that maps to the actual form fields.  It generates an [example PDF file](#example-filled-pdf) filled with the unique integer IDs so you can visually identify the fields you wish to fill.
+
+![Image of two empty frields from f1040 PDF](./images/f1040-filled-fields.png)
+
+Then, it becomes *much* easier to keep track of fields, and build a form filler script that is used to dynamically set values in the form.  For example:
+
+```yaml
+# f1040-filler.yaml
+fill_first_name:
+  6: ${ctx.firstName}
+fill_last_name:
+  7: ${ctx.lastName}
+```
+
+In the script above, the `fill_first_name` key must be unique, but it is almost completely arbitrary (more on that later).  The key helps the script maintainer identify the field by something other than the integer ID.  The `6` indicates that this script will fill field with ID `6` (the *Your first name and middle initial* field).
+
+The `${ctx.firstName}` is a [JavaScript template literal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals).  The `ctx` is from the [config file](#example-config-file) that you customized:
+
+```yaml
+# config.yaml
+firstName: Joe A
+lastName: Bloggs
+```
+After running the script, it will fill the form, and evaluate `${ctx.firstName}` as "Joe A" and assign it to the input field, `topmostSubform[0].Page1[0].f1_02[0]`.  Then, it will do the same for `${ctx.lastName}`, yielding:
+
+![Image of two empty frields from f1040 PDF](./images/f1040-filled-fields-joe-bloggs.png)
+
+It has a dependency on the [PDF Toolkit](http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit). 
 
 ## API
 

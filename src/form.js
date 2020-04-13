@@ -6,7 +6,7 @@ const YAML = require('js-yaml');
 const getHelpers = require('./helpers');
 
 const { promises: afs } = fs;
-const log = require('debug')('pdffiller-engine');
+const log = require('debug')('pdffiller-script');
 pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatten);
 
 /**

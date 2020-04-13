@@ -46,7 +46,7 @@ engine.map(argv.source, {
 	console.log(chalk.cyan('created map:', result.map));
 	if (result.filled) {
 		console.log(chalk.cyan('filled example:', result.filled));
-		console.log(chalk.cyan('filler example:', result.filler));
+		console.log(chalk.cyan('script example:', result.script));
 		console.log(chalk.cyan('config example:', result.config));
 		console.log(`\
 The example PDF file has been filled out with unique integer ID that correlate

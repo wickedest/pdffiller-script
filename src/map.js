@@ -5,7 +5,7 @@ const pdfFiller = require('pdffiller');
 const YAML = require('js-yaml');
 
 const { promises: afs } = fs;
-const log = require('debug')('pdffiller-engine');
+const log = require('debug')('pdffiller-script');
 pdfFiller.generatePDFTemplateAsync = util.promisify(pdfFiller.generateFDFTemplate);
 pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatten);
 
@@ -33,11 +33,11 @@ async function map(pdfFile, options = {}) {
 	const mapFile = path.join(dir, `${basename}-map.yaml`);
 	// the "filled" is the PDF form filled with integer values
 	const filledFile = path.join(dir, `${basename}-example-filled.pdf`);
-	const fillerFile = path.join(dir, `${basename}-example-filler.yaml`);
+	const scriptFile = path.join(dir, `${basename}-example-script.yaml`);
 	const configFile = path.join(dir, `${basename}-example-config.yaml`);
 	log('mapFile:', mapFile);
 	log('filledFile:', filledFile);
-	log('fillerFile:', fillerFile);
+	log('scriptFile:', scriptFile);
 	log('configFile:', configFile);
 
 	await ensureDirectory(dir);
@@ -65,9 +65,9 @@ async function map(pdfFile, options = {}) {
 	await afs.writeFile(mapFile, YAML.safeDump(template));
 
 	if (options.example) {
-		// write the example filler file
-		log('writing filler', fillerFile);
-		await afs.writeFile(fillerFile, filled.join('\n'));
+		// write the example filler script file
+		log('writing script', scriptFile);
+		await afs.writeFile(scriptFile, filled.join('\n'));
 
 		// write the example config file
 		log('writing config', configFile);
@@ -80,7 +80,7 @@ async function map(pdfFile, options = {}) {
 		return {
 			map: mapFile,
 			filled: filledFile,
-			filler: fillerFile,
+			script: scriptFile,
 			config: configFile
 		};
 	}

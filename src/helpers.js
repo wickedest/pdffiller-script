@@ -1,3 +1,5 @@
+const log = require('debug')('pdffiller-script');
+
 function getHelpers(config = {}) {
 	const formatWhole = new Intl.NumberFormat(config.locale || 'en-GB', {
 		maximumFractionDigits: 0
@@ -14,6 +16,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currency(number) {
+		log(`currency(${number})`);
 		if (number === undefined) {
 			return '0.00';
 		}
@@ -24,6 +27,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currencyDec(number) {
+		log(`currencyDec(${number})`);
 		const cur = currency(number);
 		if (cur === 'NaN') {
 			return cur;
@@ -35,6 +39,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currencyWhole(number) {
+		log(`currencyWhole(${number})`);
 		if (number === undefined) {
 			return '0';
 		}
@@ -45,6 +50,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function parseCurrency(val) {
+		log(`parseCurrency(${val})`);
 		if (val === undefined || val === null || val === '') {
 			return 0;
 		}
@@ -68,6 +74,7 @@ function getHelpers(config = {}) {
 	 * @return {string} The `val` with the first letter capitalized.
 	 */
 	function strCapitalize(val) {
+		log(`strCapitalize(${val})`);
 		if (!val || !val.substr) {
 			return val;
 		}
@@ -79,6 +86,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function strNoDash(val) {
+		log(`strNoDash(${val})`);
 		if (!val || !val.replace) {
 			return val;
 		}
@@ -89,6 +97,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function strTrim(val) {
+		log(`strTrim(${val})`);
 		if (!val || !val.trim) {
 			return val;
 		}
