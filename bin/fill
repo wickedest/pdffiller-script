@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const chalk = require('chalk');
-const path = require('path');
 const { Form } = require('..');
 
 const { argv } = require('yargs')
@@ -47,9 +46,8 @@ const { argv } = require('yargs')
 	.strict();
 
 const form = new Form();
-const formName = path.basename(argv.source, '.pdf');
 
-form.init(formName, argv.map, argv.config)
+form.init(argv.source, argv.map, argv.config)
 	.then(() => form.fill(argv.script))
 	.then(() => form.save(argv.source, argv.output))
 	.then((result) => {
@@ -59,16 +57,3 @@ form.init(formName, argv.map, argv.config)
 		console.error(err);
 		process.exit(-1);
 	});
-
-
-// // pdfFile, mapFile, configFile, fillerFile
-// engine.fillForm(argv.source, argv.map, argv.config, argv.script, {
-// 	output: argv.output
-// })
-// .then(result => {
-// 	console.log(`\
-// Done\
-// `);
-// }).catch(err => {
-// 	console.error(err);
-// });

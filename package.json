@@ -34,7 +34,10 @@
   },
   "nyc": {
     "all": true,
-    "reporter": [ "lcov", "text-summary" ]
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
   },
   "scripts": {
     "build": "npm run build:lint && npm run test && npm run build:doc",

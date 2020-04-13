@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const log = require('debug')('pdffiller-script');
 
 function getHelpers(config = {}) {
@@ -16,7 +17,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currency(number) {
-		log(`currency(${number})`);
+		log(`  currency(${number})`);
 		if (number === undefined) {
 			return '0.00';
 		}
@@ -27,7 +28,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currencyDec(number) {
-		log(`currencyDec(${number})`);
+		log(`  currencyDec(${number})`);
 		const cur = currency(number);
 		if (cur === 'NaN') {
 			return cur;
@@ -39,9 +40,12 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currencyWhole(number) {
-		log(`currencyWhole(${number})`);
+		log(`  currencyWhole(${number})`);
 		if (number === undefined) {
 			return '0';
+		}
+		if (typeof number === 'string') {
+			number = parseCurrency(number);
 		}
 		return `${formatWhole.format(number)}`;
 	}
@@ -50,7 +54,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function parseCurrency(val) {
-		log(`parseCurrency(${val})`);
+		log(`  parseCurrency('${chalk.yellow(val)}')`);
 		if (val === undefined || val === null || val === '') {
 			return 0;
 		}

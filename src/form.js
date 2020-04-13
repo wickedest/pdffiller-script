@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const util = require('util');
 const chalk = require('chalk');
 const pdfFiller = require('pdffiller');
@@ -13,37 +14,55 @@ pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatte
  * Creates a fillable form from a PDF.
  */
 class Form {
-	/**
-	 * Initialize the form.  The `map` and `config` can be a string or an
-	 * object.  If it is a string, then it will be read in as a YAML file.
-	 * The `map` was previously generated from a PDF document using the
-	 * {@link map} function.
-	 *
-	 * @param {string} formName - A unique name for the form.
-	 * @param {string|object} map - The map generated from {@link map}.
-	 * @param {string|object} config - The config used by the filler script.
-	 * @public
-	 * @async
-	 */
-	async init(formName, map, config) {
+	async init(config) {
 		ensureNotUsingReservedKeys(config);
-		this.formName = formName;
 		this.config = await loadYAML(config);
-		this.map = await loadYAML(map);
-		this.helpers = getHelpers();
-		this.helperNames = this.helpers.map(a => a.name);
 		this.ctx = {
 			...this.config,
-			forms: {
-				[this.formName]: {}
-			}
+			forms: {}
 		};
+		this.helpers = getHelpers();
+		this.helperNames = this.helpers.map(a => a.name);
 		this.registerFriendlyKeyHelpers({
 			'.currency': this.helpers[0], // currency
 			'.dec': this.helpers[1], // currencyDec
 			'.whole': this.helpers[2], // currencyWhole
 			'.nodash': this.helpers[5] // strNoDash
 		});
+	}
+
+	/**
+	 * Initialize the form.  The `map` and `config` can be a string or an
+	 * object.  If it is a string, then it will be read in as a YAML file.
+	 * The `map` was previously generated from a PDF document using the
+	 * {@link map} function.
+	 *
+	 * @param {string} source - The PDF source.
+	 * @param {string|object} map - The map generated from {@link map}.
+	 * @param {string|object} config - The config used by the filler script.
+	 * @public
+	 * @async
+	 */
+	async load(source, map) {
+		// TODO: check `source` exists
+		this.formName = path.basename(source, '.pdf');
+		this.sourcePdf = source;
+		this.map = await loadYAML(map);
+		this.ctx.forms[this.formName] = {};
+		// this.helpers = getHelpers();
+		// this.helperNames = this.helpers.map(a => a.name);
+		// this.ctx = {
+		// 	...this.config,
+		// 	forms: {
+		// 		[this.formName]: {}
+		// 	}
+		// };
+		// this.registerFriendlyKeyHelpers({
+		// 	'.currency': this.helpers[0], // currency
+		// 	'.dec': this.helpers[1], // currencyDec
+		// 	'.whole': this.helpers[2], // currencyWhole
+		// 	'.nodash': this.helpers[5] // strNoDash
+		// });
 	}
 
 	/**
@@ -81,34 +100,35 @@ class Form {
 			let fieldId;
 			let fieldIndex;
 			let fillValue;
+			log('field: ', chalk.blue(friendlyKey));
 
 			if (filler[friendlyKey].value) {
-				log('updateForm calculate', friendlyKey);
+				log('  type: calculate');
 				// this is a calculation. first, compute the value
 				const value = this.evalTemplate(
-					this.config, filler[friendlyKey].value);
-				log('updateForm calculate value:', value);
+					this.ctx, filler[friendlyKey].value);
+				log('  calculate value:', value);
 
 				// run through calculate function
 				const { field, fill } = this.evalCalculate(
-					this.config, filler[friendlyKey].calculate, value);
+					this.ctx, filler[friendlyKey].calculate, value);
 
-				log('updateForm calculated:', { field, fill });
+				log('  calculated:', { field, fill });
 
 				fieldIndex = field;
 				fieldId = findField(this.map, fieldIndex);
 				fillValue = fill;
 			} else {
-				log('updateForm index lookup', friendlyKey);
+				log('  type: fixed-field');
 				const ids = Object.keys(filler[friendlyKey]);
 				if (ids.length !== 1) {
 					throw new Error(`${friendlyKey} has more than 1 field to fill`);
 				}
 				fieldIndex = ids[0];
-				log('updateForm index id:', fieldIndex);
+				log('  index id:', chalk.blue(fieldIndex));
 				fieldId = findField(this.map, fieldIndex);
 				fillValue = this.evalTemplate(
-					this.config, filler[friendlyKey][fieldIndex]);
+					this.ctx, filler[friendlyKey][fieldIndex]);
 			}
 			if (!fieldId) {
 				throw new Error(`failed to find field index '${fieldIndex}' in field map`);
@@ -116,10 +136,13 @@ class Form {
 
 			for (const key in this.endsWithFuncs) {
 				if (friendlyKey.endsWith(key)) {
-					console.log('FOUND', key);
 					fillValue = this.endsWithFuncs[key](fillValue);
 				}
 			}
+
+			// if (fillValue === 'NaN') {
+			// 	throw new Error(`got NaN from ${friendlyKey}`);
+			// }
 
 			log('input', chalk.cyan(friendlyKey), '=>',
 				chalk.cyan(fieldIndex), '=>', chalk.cyan(fieldId));
@@ -137,16 +160,18 @@ class Form {
 	 * @public
 	 * @async
 	 */
-	async save(source, dest) {
-		log('fill', { source, dest });
+	async save(dest) {
+		log('fill', { source: this.sourcePdf, dest });
 		const filled = this.ctx.forms[this.formName];
-		return pdfFiller.fillFormWithFlattenAsync(source, dest, filled, false);
+		return pdfFiller.fillFormWithFlattenAsync(
+			this.sourcePdf, dest, filled, false);
 	}
 
 	/**
 	 * @private
 	 */
 	evalTemplate(data, template) {
+		log('evalTemplate', template);
 		const validator = {
 			get(target, key) {
 				if (typeof target[key] === 'object' && target[key] !== null) {
@@ -178,6 +203,7 @@ class Form {
 	 * @private
 	 */
 	evalCalculate(data, template, value) {
+		log('evalCalculate', template);
 		try {
 			const fn = new Function(...this.helperNames, `return ${template}`);
 			const result = fn.call(null, ...this.helpers)(data, value);
@@ -212,13 +238,13 @@ function findField(map, fieldIndex) {
  * @private
  */
 function fillFormField(ctx, formName, friendlyKey, fieldId, value) {
-	log('filling', chalk.yellow(`${formName} ${fieldId}=${value}`));
-
 	// Fill the form field with the value
 	ctx.forms[formName][fieldId] = value;
+	log(`filling ctx.forms['${chalk.yellow(formName)}']['${chalk.yellow(fieldId)}'] = '${value}'`);
 
 	// Also fill the friendly key
 	ctx.forms[formName][friendlyKey] = value;
+	log(`filling ctx.forms['${chalk.yellow(formName)}']['${chalk.yellow(friendlyKey)}'] = '${value}'`);
 }
 
 /**

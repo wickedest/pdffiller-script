@@ -62,6 +62,7 @@ describe('helpers', () => {
 		expect(parseCurrency('1234.56')).to.equal(1234.56);
 		expect(parseCurrency('1,234.56')).to.equal(1234.56);
 		expect(parseCurrency('1234')).to.equal(1234);
+		expect(parseCurrency('0')).to.equal(0);
 		expect(parseCurrency(null)).to.equal(0);
 		expect(parseCurrency(undefined)).to.equal(0);
 		expect(parseCurrency('')).to.equal(0);

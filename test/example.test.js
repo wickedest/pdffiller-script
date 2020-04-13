@@ -39,9 +39,10 @@ describe('example', () => {
 		};
 
 		const form = new Form();
-		await form.init('f1040', mapFile, configFile);
+		await form.init(configFile);
+		await form.load(examplePdf, mapFile);
 		await form.fill(fillerFile);
-		await form.save(examplePdf, outputPdf);
+		await form.save(outputPdf);
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);

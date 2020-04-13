@@ -16,7 +16,7 @@ describe('form', () => {
 	it('should not allow reserved fields when initializing form', async () => {
 		const form = new Form();
 		try {
-			await form.init('foo', {}, { forms: 'bad' });
+			await form.init({ forms: 'bad' });
 			expect.fail('Unexpected');
 		} catch (ex) {
 			expect(ex.message)
@@ -25,7 +25,6 @@ describe('form', () => {
 	});
 
 	it('should fill a form using a static value', async () => {
-		const formName = 'foo';
 		const config = {};
 		const map = {
 			'form[0].city.input[0]': '0'
@@ -41,18 +40,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should fill a form using a direct field index', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'Dublin'
 		};
@@ -70,18 +69,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should fill a form using helper functions', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'd-u-b-l-i-n'
 		};
@@ -99,18 +98,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should fill a form using built-in endsWith functions', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'd-u-b-l-i-n'
 		};
@@ -128,18 +127,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should fill a form using registered endsWith functions', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'dublin'
 		};
@@ -160,18 +159,18 @@ describe('form', () => {
 		form.registerFriendlyKeyHelpers({
 			'.upper': (val) => val.toUpperCase()
 		});
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should fill a form using a calculation function', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'Dublin'
 		};
@@ -197,18 +196,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should fill a form using a calculation function with helper', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'Dublin'
 		};
@@ -234,18 +233,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should update form with empty values when config property is undefined', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'Dublin'
 		};
@@ -263,18 +262,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should update form with values obtained from nested config property', async () => {
-		const formName = 'foo';
 		const config = {
 			location: {
 				city: 'Dublin'
@@ -294,18 +293,18 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		await form.fill(filler);
-		await form.save('source.pdf', 'dest.pdf');
+		await form.save('dest.pdf');
 
 		expect(pdfFiller.fillFormWithFlattenAsync.calls)
 			.to.have.length(1);
 		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 
 	it('should fail to fill a form using a calculation function that does not return {field, fill}', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'Dublin'
 		};
@@ -322,7 +321,8 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		try {
 			await form.fill(filler);
 			expect.fail('Unexpected');
@@ -333,7 +333,6 @@ describe('form', () => {
 	});
 
 	it('should fail to update form when map is missing index', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'd-u-b-l-i-n'
 		};
@@ -347,7 +346,8 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		try {
 			await form.fill(filler);
 			expect.fail('Unexpected');
@@ -358,7 +358,6 @@ describe('form', () => {
 	});
 
 	it('should fail to update form when filler has more than one key', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'd-u-b-l-i-n'
 		};
@@ -373,7 +372,8 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		try {
 			await form.fill(filler);
 			expect.fail('Unexpected');
@@ -384,7 +384,6 @@ describe('form', () => {
 	});
 
 	it('should fail to update form indexed template fails to compile', async () => {
-		const formName = 'foo';
 		const config = {
 			city: 'Dublin'
 		};
@@ -398,7 +397,8 @@ describe('form', () => {
 		};
 
 		const form = new Form();
-		await form.init(formName, map, config);
+		await form.init(config);
+		await form.load('foo.pdf', map);
 		try {
 			await form.fill(filler);
 			expect.fail('Unexpected');
@@ -409,14 +409,13 @@ describe('form', () => {
 	});
 
 	it('should fail to init YAML config file that does not exist', async () => {
-		const formName = 'foo';
 		const map = {
 			'form[0].city.input[0]': '0'
 		};
 
 		const form = new Form();
 		try {
-			await form.init(formName, map, 'missing.yaml');
+			await form.init('missing.yaml');
 			expect.fail('Unexpected');
 		} catch (ex) {
 			expect(ex.message)
@@ -425,14 +424,13 @@ describe('form', () => {
 	});
 
 	it('should fail to load a config file that does not parse as YAML', async () => {
-		const formName = 'foo';
 		const map = {
 			'form[0].city.input[0]': '0'
 		};
 
 		const form = new Form();
 		try {
-			await form.init(formName, map, 'README.md');
+			await form.init('README.md');
 			expect.fail('Unexpected');
 		} catch (ex) {
 			expect(ex.message)
