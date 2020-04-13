@@ -33,7 +33,7 @@ describe('map', () => {
 
 			expect(fs.existsSync(path.join(tmp, 'example-map.yaml')))
 				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'example-filler.yaml')))
+			expect(fs.existsSync(path.join(tmp, 'example-script.yaml')))
 				.to.be.false;
 			expect(fs.existsSync(path.join(tmp, 'example-config.yaml')))
 				.to.be.false;
@@ -56,7 +56,7 @@ describe('map', () => {
 
 			expect(fs.existsSync(path.join(tmp, 'foo-map.yaml')))
 				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'foo-example-filler.yaml')))
+			expect(fs.existsSync(path.join(tmp, 'foo-example-script.yaml')))
 				.to.be.true;
 			expect(fs.existsSync(path.join(tmp, 'foo-example-config.yaml')))
 				.to.be.true;

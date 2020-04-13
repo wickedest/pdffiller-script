@@ -14,6 +14,14 @@
 </dd>
 </dl>
 
+## Typedefs
+
+<dl>
+<dt><a href="#HelperFunction">HelperFunction</a> ⇒ <code>number</code> | <code>string</code></dt>
+<dd><p>HelperFunction definition</p>
+</dd>
+</dl>
+
 <a name="Form"></a>
 
 ## Form
@@ -23,6 +31,7 @@ Creates a fillable form from a PDF.
 
 * [Form](#Form)
     * [.init(formName, map, config)](#Form+init)
+    * [.registerFriendlyKeyHelpers(funcs)](#Form+registerFriendlyKeyHelpers)
     * [.fill(filler)](#Form+fill)
     * [.save(source, dest)](#Form+save)
 
@@ -42,6 +51,17 @@ The `map` was previously generated from a PDF document using the
 | formName | <code>string</code> | A unique name for the form. |
 | map | <code>string</code> \| <code>object</code> | The map generated from [map](#map). |
 | config | <code>string</code> \| <code>object</code> | The config used by the filler script. |
+
+<a name="Form+registerFriendlyKeyHelpers"></a>
+
+### form.registerFriendlyKeyHelpers(funcs)
+Registers friendly key helpers for use with the script.
+
+**Kind**: instance method of [<code>Form</code>](#Form)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| funcs | <code>object</code> | A map of function suffix to [HelperFunction](#HelperFunction). |
 
 <a name="Form+fill"></a>
 
@@ -83,4 +103,16 @@ Generates a map from a PDF file and saves as YAML.
 | --- | --- | --- | --- |
 | pdfFile | <code>string</code> |  | The PDF file containing a form. |
 | [options] | <code>object</code> | <code>{}</code> | Options. |
+
+<a name="HelperFunction"></a>
+
+## HelperFunction ⇒ <code>number</code> \| <code>string</code>
+HelperFunction definition
+
+**Kind**: global typedef  
+**Returns**: <code>number</code> \| <code>string</code> - The converted `val`.  
+
+| Param | Type |
+| --- | --- |
+| val | <code>number</code> \| <code>string</code> | 
 

@@ -39,14 +39,22 @@ class Form {
 			}
 		};
 		this.registerFriendlyKeyHelpers({
-			'.whole': this.helpers[2], // currencyWhole
+			'.currency': this.helpers[0], // currency
 			'.dec': this.helpers[1], // currencyDec
+			'.whole': this.helpers[2], // currencyWhole
 			'.nodash': this.helpers[5] // strNoDash
 		});
 	}
 
 	/**
-	 *
+	 * HelperFunction definition
+	 * @typedef {HelperFunction} HelperFunction
+	 * @param {number|string} val
+	 * @returns {number|string} The converted `val`.
+	 */
+	/**
+	 * Registers friendly key helpers for use with the script.
+	 * @param {object} funcs - A map of function suffix to {@link HelperFunction}.
 	 */
 	registerFriendlyKeyHelpers(funcs) {
 		if (!this.endsWithFuncs) {
