@@ -1,11 +1,11 @@
-# pdffiller-map
+# pdffiller-engine
 
-Simple yet powerful PDF form filling.
+Scripted PDF form filling.
 
 ## Install
 
 ```bash
-$ npm install pdffiller-map
+$ npm install pdffiller-engine
 ```
 
 ## CLI usage
@@ -15,7 +15,7 @@ $ npm install pdffiller-map
 Parse the PDF and generate example files:
 
 ```bash
-$ npx pdffiller-map map mypdf.pdf
+$ npx pdffiller-engine map mypdf.pdf
 ```
 
 The following files are generated:

@@ -30,11 +30,32 @@ class Form {
 		this.formName = formName;
 		this.config = await loadYAML(config);
 		this.map = await loadYAML(map);
+		this.helpers = getHelpers();
+		this.helperNames = this.helpers.map(a => a.name);
 		this.ctx = {
 			...this.config,
 			forms: {
 				[this.formName]: {}
 			}
+		};
+		this.registerFriendlyKeyHelpers({
+			'.whole': this.helpers[2], // currencyWhole
+			'.dec': this.helpers[1], // currencyDec
+			'.nodash': this.helpers[5] // strNoDash
+		});
+	}
+
+	/**
+	 *
+	 */
+	registerFriendlyKeyHelpers(funcs) {
+		if (!this.endsWithFuncs) {
+			this.endsWithFuncs = funcs;
+			return;
+		}
+		this.endsWithFuncs = {
+			...this.endsWithFuncs,
+			...funcs
 		};
 	}
 
@@ -56,14 +77,13 @@ class Form {
 			if (filler[friendlyKey].value) {
 				log('updateForm calculate', friendlyKey);
 				// this is a calculation. first, compute the value
-				const value = evalTemplate(this.config, filler[friendlyKey].value);
+				const value = this.evalTemplate(
+					this.config, filler[friendlyKey].value);
 				log('updateForm calculate value:', value);
 
 				// run through calculate function
-				const {
-					field,
-					fill
-				} = evalCalculate(this.config, filler[friendlyKey].calculate, value);
+				const { field, fill } = this.evalCalculate(
+					this.config, filler[friendlyKey].calculate, value);
 
 				log('updateForm calculated:', { field, fill });
 
@@ -79,10 +99,18 @@ class Form {
 				fieldIndex = ids[0];
 				log('updateForm index id:', fieldIndex);
 				fieldId = findField(this.map, fieldIndex);
-				fillValue = evalTemplate(this.config, filler[friendlyKey][fieldIndex]);
+				fillValue = this.evalTemplate(
+					this.config, filler[friendlyKey][fieldIndex]);
 			}
 			if (!fieldId) {
 				throw new Error(`failed to find field index '${fieldIndex}' in field map`);
+			}
+
+			for (const key in this.endsWithFuncs) {
+				if (friendlyKey.endsWith(key)) {
+					console.log('FOUND', key);
+					fillValue = this.endsWithFuncs[key](fillValue);
+				}
 			}
 
 			log('input', chalk.cyan(friendlyKey), '=>',
@@ -105,6 +133,59 @@ class Form {
 		log('fill', { source, dest });
 		const filled = this.ctx.forms[this.formName];
 		return pdfFiller.fillFormWithFlattenAsync(source, dest, filled, false);
+	}
+
+	/**
+	 * @private
+	 */
+	evalTemplate(data, template) {
+		const validator = {
+			get(target, key) {
+				if (typeof target[key] === 'object' && target[key] !== null) {
+					return new Proxy(target[key], validator);
+				} else {
+					if (!Reflect.has(target, key)) {
+						return '';
+					}
+					return target[key];
+				}
+			}
+		};
+		const proxyCtx = new Proxy(data, validator);
+
+		try {
+			const fn = new Function(
+				'ctx',
+				...this.helperNames,
+				'return `' + template + '`;'
+			);
+			return fn.call(null, proxyCtx, ...this.helpers) || '';
+		} catch (ex) {
+			log(`error with template: ${template}`, ex);
+			throw ex;
+		}
+	}
+
+	/**
+	 * @private
+	 */
+	evalCalculate(data, template, value) {
+		try {
+			const fn = new Function(...this.helperNames, `return ${template}`);
+			const result = fn.call(null, ...this.helpers)(data, value);
+
+			if (typeof result !== 'object'
+				|| result.field === undefined
+				|| result.fill === undefined) {
+				log('invalid calculate return value', template);
+				throw new Error('calculate functions should return an object: { field, fill }');
+			}
+
+			return result;
+		} catch (ex) {
+			log(chalk.red(`error with template: ${template}`));
+			throw ex;
+		}
 	}
 }
 
@@ -130,66 +211,6 @@ function fillFormField(ctx, formName, friendlyKey, fieldId, value) {
 
 	// Also fill the friendly key
 	ctx.forms[formName][friendlyKey] = value;
-}
-
-/**
- * @private
- */
-function evalTemplate(data, template) {
-	const helpers = getHelpers();
-	const helperNames = helpers.map(a => a.name);
-
-	const validator = {
-		get(target, key) {
-			// console.log('key', key, {
-			// 	target,
-			// 	key,
-			// 	obj: typeof target[key]
-			// });
-			if (typeof target[key] === 'object' && target[key] !== null) {
-				return new Proxy(target[key], validator);
-			} else {
-				if (!Reflect.has(target, key)) {
-					return '';
-				}
-				return target[key];
-			}
-		}
-	};
-	const proxyCtx = new Proxy(data, validator);
-
-	try {
-		const fn = new Function('ctx', ...helperNames, 'return `' + template + '`;');
-		return fn.call(null, proxyCtx, ...helpers) || '';
-	} catch (ex) {
-		log(`error with template: ${template}`, ex);
-		throw ex;
-	}
-}
-
-/**
- * @private
- */
-function evalCalculate(data, template, value) {
-	const helpers = getHelpers();
-	const helperNames = helpers.map(a => a.name);
-
-	try {
-		const fn = new Function(...helperNames, `return ${template}`);
-		const result = fn.call(null, ...helpers)(data, value);
-
-		if (typeof result !== 'object'
-			|| result.field === undefined
-			|| result.fill === undefined) {
-			log('invalid calculate return value', template);
-			throw new Error('calculate functions should return an object: { field, fill }');
-		}
-
-		return result;
-	} catch (ex) {
-		log(chalk.red(`error with template: ${template}`));
-		throw ex;
-	}
 }
 
 /**

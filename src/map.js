@@ -32,9 +32,9 @@ async function map(pdfFile, options = {}) {
 	const basename = options.name || path.basename(pdfFile, '.pdf');
 	const mapFile = path.join(dir, `${basename}-map.yaml`);
 	// the "filled" is the PDF form filled with integer values
-	const filledFile = path.join(dir, `${basename}-filled.pdf`);
-	const fillerFile = path.join(dir, `${basename}-filler.yaml`);
-	const configFile = path.join(dir, `${basename}-config.yaml`);
+	const filledFile = path.join(dir, `${basename}-example-filled.pdf`);
+	const fillerFile = path.join(dir, `${basename}-example-filler.yaml`);
+	const configFile = path.join(dir, `${basename}-example-config.yaml`);
 	log('mapFile:', mapFile);
 	log('filledFile:', filledFile);
 	log('fillerFile:', fillerFile);

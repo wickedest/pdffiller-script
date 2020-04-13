@@ -49,18 +49,18 @@ describe('map', () => {
 		const tmp = await afs.mkdtemp(path.join(os.tmpdir(), 'pdffiller-engine-'));
 		try {
 			await map(examplePdf, {
-				name: 'example',
+				name: 'foo',
 				dir: tmp,
 				example: true
 			});
 
-			expect(fs.existsSync(path.join(tmp, 'example-map.yaml')))
+			expect(fs.existsSync(path.join(tmp, 'foo-map.yaml')))
 				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'example-filler.yaml')))
+			expect(fs.existsSync(path.join(tmp, 'foo-example-filler.yaml')))
 				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'example-config.yaml')))
+			expect(fs.existsSync(path.join(tmp, 'foo-example-config.yaml')))
 				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'example-filled.pdf')))
+			expect(fs.existsSync(path.join(tmp, 'foo-example-filled.pdf')))
 				.to.be.true;
 		} finally {
 			await afs.rmdir(tmp, { recursive: true });

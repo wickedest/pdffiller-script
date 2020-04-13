@@ -11,24 +11,25 @@ const { argv } = require('yargs')
 				describe: 'The PDF source file.',
 				type: 'string',
 				required: true
-			}).alias(
-				'o', 'out'
+			}).option(
+				'out', {
+					alias: 'o',
+					description: 'The output directory.',
+					default: '.'
+				}
+			).option(
+				'name', {
+					alias: 'n',
+					description: 'The name of YAML template file to generate.  Defaults to the basename of the PDF.'
+				}
+			).option(
+				'example', {
+					type: 'boolean',
+					description: 'Generate examples (PDF, filler script, and config).',
+					default: true
+				}
 			).alias(
 				'v', 'version'
-			).alias(
-				'n', 'name'
-			).describe(
-				'n', 'The name of YAML template file to generate.  Defaults to the basename of the PDF.'
-			).describe(
-				'o', 'The output directory.'
-			).default(
-				'o', '.'
-			).boolean(
-				'example'
-			).describe(
-				'example', 'Generate an example PDF with the form filled out.'
-			).default(
-				'example', true
 			).alias(
 				'h', 'help'
 			)

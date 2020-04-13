@@ -109,6 +109,67 @@ describe('form', () => {
 			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
 	});
 
+	it('should fill a form using built-in endsWith functions', async () => {
+		const formName = 'foo';
+		const config = {
+			city: 'd-u-b-l-i-n'
+		};
+		const map = {
+			'form[0].city.input[0]': '0'
+		};
+		const filler = {
+			'fill_city.nodash': {
+				0: '${ctx.city}'
+			}
+		};
+		const expected = {
+			'fill_city.nodash': 'dublin',
+			'form[0].city.input[0]': 'dublin'
+		};
+
+		const form = new Form();
+		await form.init(formName, map, config);
+		await form.fill(filler);
+		await form.save('source.pdf', 'dest.pdf');
+
+		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+			.to.have.length(1);
+		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
+			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+	});
+
+	it('should fill a form using registered endsWith functions', async () => {
+		const formName = 'foo';
+		const config = {
+			city: 'dublin'
+		};
+		const map = {
+			'form[0].city.input[0]': '0'
+		};
+		const filler = {
+			'fill_city.upper': {
+				0: '${ctx.city}'
+			}
+		};
+		const expected = {
+			'fill_city.upper': 'DUBLIN',
+			'form[0].city.input[0]': 'DUBLIN'
+		};
+
+		const form = new Form();
+		form.registerFriendlyKeyHelpers({
+			'.upper': (val) => val.toUpperCase()
+		});
+		await form.init(formName, map, config);
+		await form.fill(filler);
+		await form.save('source.pdf', 'dest.pdf');
+
+		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+			.to.have.length(1);
+		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
+			.to.deep.equal([ 'source.pdf', 'dest.pdf', expected, false ]);
+	});
+
 	it('should fill a form using a calculation function', async () => {
 		const formName = 'foo';
 		const config = {
