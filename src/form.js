@@ -23,8 +23,13 @@ class Form {
 	 * forms.
 	 */
 	async init(config) {
+		log('init', config);
 		ensureNotUsingReservedKeys(config);
-		this.config = await loadYAML(config);
+		try {
+			this.config = await loadYAML(config);
+		} catch (ex) {
+			throw new Error(`Invalid YAML "${config}": ${ex}`)
+		}
 		this.ctx = {
 			...this.config,
 			forms: {}
@@ -52,6 +57,7 @@ class Form {
 	 * @async
 	 */
 	async load(source, map) {
+		log('load', source, map);
 		// TODO: check `source` exists
 		this.formName = path.basename(source, '.pdf');
 		this.sourcePdf = source;
@@ -75,6 +81,7 @@ class Form {
 	 * @public
 	 */
 	setFormName(name) {
+		log('setFormName', name);
 		this.formName = name;
 		this.ctx.forms[this.formName] = {};
 	}
@@ -99,6 +106,7 @@ class Form {
 	 * @public
 	 */
 	setSourcePDF(source) {
+		log('setSourcePDF', source);
 		this.sourcePdf = source;
 	}
 
@@ -109,7 +117,15 @@ class Form {
 	 * @returns {number|string} The converted `val`.
 	 */
 	/**
-	 * Registers friendly key helpers for use with the script.
+	 * Registers friendly key helpers for use with the script.  By default, the
+	 * following key helpers are registered:
+	 *
+	 * - **.currency**: The value is a currency, meaning that it will be
+	 * parsed as a decimal and written to the form as a declimal with two
+	 * decimal places.
+	 * - **.dec**: Returns the decimal part of a currency.
+	 * - **.whole**: Returns the whole integer part of a currency.
+	 * - **.nodash**: Strips dashes from a string.
 	 *
 	 * @param {object} funcs - A map of function suffix to {@link HelperFunction}.
 	 * @example
@@ -120,6 +136,7 @@ class Form {
 	 * @public
 	 */
 	registerFriendlyKeyHelpers(funcs) {
+		log('registerFriendlyKeyHelpers', funcs);
 		if (!this.endsWithFuncs) {
 			this.endsWithFuncs = funcs;
 			return;
@@ -144,6 +161,7 @@ class Form {
 	 * @async
 	 */
 	async fill(filler, options = {}) {
+		log('fill', filler, options);
 		filler = await loadYAML(filler);
 		for (const friendlyKey in filler) {
 			let fieldId;
@@ -175,6 +193,7 @@ class Form {
 
 				if (options.debug) {
 					if (friendlyKey === options.debug) {
+						// eslint-disable-next-line no-debugger
 						debugger;
 					}
 				}
@@ -204,7 +223,7 @@ class Form {
 	 * @async
 	 */
 	async save(dest) {
-		log('fill', { source: this.sourcePdf, dest });
+		log('save', { source: this.sourcePdf, dest });
 		const filled = this.ctx.forms[this.formName];
 		for (const key in filled) {
 			if (filled[key] === null) {
@@ -244,8 +263,8 @@ class Form {
 				'output',
 				dest
 			];
-			log(`pdftk`, ...args);
-			execFile('pdftk', args, (error, stdout, stderr) => {
+			log('pdftk', ...args);
+			execFile('pdftk', args, (error) => {
 				if (error) {
 					return reject(error);
 				}
@@ -272,8 +291,8 @@ class Form {
 				'output',
 				dest
 			];
-			log(`pdftk`, ...args);
-			execFile('pdftk', args, (error, stdout, stderr) => {
+			log('pdftk', ...args);
+			execFile('pdftk', args, (error) => {
 				if (error) {
 					return reject(error);
 				}

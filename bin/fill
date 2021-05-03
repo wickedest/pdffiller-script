@@ -47,13 +47,14 @@ const { argv } = require('yargs')
 
 const form = new Form();
 
-form.init(argv.source, argv.map, argv.config)
+form.init(argv.config)
+	.then(() => form.load(argv.source, argv.map))
 	.then(() => form.fill(argv.script))
-	.then(() => form.save(argv.source, argv.output))
+	.then(() => form.save(argv.output))
 	.then((result) => {
 		console.log('Done');
 	})
 	.catch((err) => {
-		console.error(err);
+		console.error(err.message);
 		process.exit(-1);
 	});

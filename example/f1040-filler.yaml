@@ -1,5 +1,18 @@
+# The "filing.status" is just a friendly name for the value.  It helps
+# the script developer identify which field is being filled.  The
+# context (ctx) is updated by storing the property "filing.status" and
+# the value calculated here.  In other words, it updates the "filled"
+# field.
 filing.status:
+  # The "ctx.filingStatus" is a config value (or a computed value)
+  # used as the `value` input into the `calculate` function below.
   value: ctx.filingStatus
+  # Sometimes, it is necessary to do some calculation with the
+  # config `value`.  In this case, the word "single" is not a
+  # valid value for the field (see "f1040-map.yaml"):
+  # `topmostSubform[0].Page1[0].FilingStatus[0].c1_01[1]`
+  # It must be converted to a valid value, which is an integer
+  # number.  The actual filled value can be trial-and-error.
   calculate: |
     (ctx, value) => {
       switch (value) {
@@ -18,11 +31,17 @@ filing.status:
       }
     }
 
+# This field joins a couple of inputs to product a first name and middle
+# initial.
 your.first.name.and.middle.initial:
   6: ctx.identity.firstName + (ctx.identity.middleName ? ` ${ctx.identity.middleName[0]}`:'')
 
+# Example of a simple map.
 last.name:
   7: ctx.identity.lastName
 
+# Example of using a helper function to strip dashes out of a string using
+# the helper function `strNoDash`.  Alternatively, the same thing can be
+# accomplished by naming the key, `social.security.number.nodash`.
 social.security.number:
   8: strNoDash(ctx.identity.ssn)

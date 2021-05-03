@@ -42,8 +42,8 @@ If you wish, you can modify `mypdf-example-config.yaml` and change a few values.
 $ npx pdffiller-script fill mypdf.pdf \
  --map mypdf-map.yaml\
  --config mypdf-example-config.yaml\
- --filler mypdf-example-filler.yaml\
- --out output.pdf
+ --filler mypdf-example-script.yaml\
+ --output output.pdf
 ```
 
 ## Scripted PDF form filling
@@ -86,6 +86,19 @@ After running the script, it will fill the form, and evaluate `${ctx.firstName}`
 ![Image of two empty frields from f1040 PDF](./docs/images/f1040-filled-fields-joe-bloggs.png)
 
 It has a dependency on the [PDF Toolkit](http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit). 
+
+## Example
+
+For use with the `./example` provided with the source.
+
+```bash
+$ npx pdffiller-script fill example/f1040.pdf \
+  --map example/f1040-map.yaml \
+  --config example/config.yaml \
+  --script example/f1040-filler.yaml \
+  --output output.pdf
+```
+
 
 ## API
 

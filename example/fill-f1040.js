@@ -40,18 +40,18 @@ async function example2() {
 				// It must be converted to a valid value, which is an integer
 				// number.  The actual filled value can be trial-and-error.
 				switch (value) {
-					case 'single':
-						return { field: '0', fill: '1' }
-					case 'married filing jointly':
-						return { field: '1', fill: '2' }
-					case 'married filing separately':
-						return { field: '2', fill: '3' }
-					case 'head of household':
-						return { field: '3', fill: '4' }
-					case 'qualifying widow(er)':
-						return { field: '4', fill: '5' }
-					default:
-						throw new Error(`unknown filingStatus: ${value}`);
+				case 'single':
+					return { field: '0', fill: '1' };
+				case 'married filing jointly':
+					return { field: '1', fill: '2' };
+				case 'married filing separately':
+					return { field: '2', fill: '3' };
+				case 'head of household':
+					return { field: '3', fill: '4' };
+				case 'qualifying widow(er)':
+					return { field: '4', fill: '5' };
+				default:
+					throw new Error(`unknown filingStatus: ${value}`);
 				}
 			}
 		},

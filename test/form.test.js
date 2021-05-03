@@ -409,10 +409,6 @@ describe('form', () => {
 	});
 
 	it('should fail to init YAML config file that does not exist', async () => {
-		const map = {
-			'form[0].city.input[0]': '0'
-		};
-
 		const form = new Form();
 		try {
 			await form.init('missing.yaml');
@@ -424,10 +420,6 @@ describe('form', () => {
 	});
 
 	it('should fail to load a config file that does not parse as YAML', async () => {
-		const map = {
-			'form[0].city.input[0]': '0'
-		};
-
 		const form = new Form();
 		try {
 			await form.init('README.md');

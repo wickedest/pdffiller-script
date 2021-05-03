@@ -117,7 +117,15 @@ await form.join([ 'A2.pdf' ], 'A.pdf');
 <a name="Form+registerFriendlyKeyHelpers"></a>
 
 ### form.registerFriendlyKeyHelpers(funcs)
-Registers friendly key helpers for use with the script.
+Registers friendly key helpers for use with the script.  By default, the
+following key helpers are registered:
+
+- **.currency**: The value is a currency, meaning that it will be
+parsed as a decimal and written to the form as a declimal with two
+decimal places.
+- **.dec**: Returns the decimal part of a currency.
+- **.whole**: Returns the whole integer part of a currency.
+- **.nodash**: Strips dashes from a string.
 
 **Kind**: instance method of [<code>Form</code>](#Form)  
 **Access**: public  
