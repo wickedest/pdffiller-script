@@ -2,3 +2,5 @@ coverage/
 node_modules/
 .nyc_output/
 output.pdf
+f1040-example-*.*
+/f1040-map.yaml

@@ -1,6 +1,13 @@
 # pdffiller-script
 
-Scripted PDF form filling.  This project is inspired by [pdffiller](https://github.com/pdffillerjs/pdffiller), but wanted something more powerful and flexible to allow filling out many forms from a single TODO...
+Scripted PDF form filling.  This project is inspired by [pdffiller](https://github.com/pdffillerjs/pdffiller), but needed something more powerful and flexible to allow filling out many forms with data from a single input configuration file, but also allowing values to be manipulated / computed before form filling.  For example, to combine first and last names, or to ensure currency values look like currency values.
+
+```yaml
+your.first.name.and.middle.initial:
+  6: ctx.identity.firstName + (ctx.identity.middleName ? ` ${ctx.identity.middleName[0]}`:'')
+```
+
+From the API, the engine is extensible.
 
 ## Install
 
@@ -91,6 +98,15 @@ It has a dependency on the [PDF Toolkit](http://www.pdflabs.com/tools/pdftk-the-
 
 For use with the `./example` provided with the source.
 
+### Generate an f1040 map file
+
+This will re-generate the `example/f1010-map.yaml` file and examples.  If you only want the map, use the option `--no-example`.
+
+```bash
+$ npx pdffiller-script map example/f1040.pdf --out "example"
+```
+
+### Fill out an f1040 form
 ```bash
 $ npx pdffiller-script fill example/f1040.pdf \
   --map example/f1040-map.yaml \
@@ -99,6 +115,11 @@ $ npx pdffiller-script fill example/f1040.pdf \
   --output output.pdf
 ```
 
+### Fill out an f1040 form via the programmatic API
+```bash
+$ cd example
+$ node fill-f1040.js
+```
 
 ## API
 

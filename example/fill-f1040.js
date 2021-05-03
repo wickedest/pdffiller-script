@@ -64,7 +64,10 @@ async function example2() {
 		'last.name': {
 			7: 'ctx.identity.lastName'
 		},
-		// Example of using a helper function to strip dashes out of a string.
+		// Example of using a helper function to strip dashes out of a string
+		// using the helper function `strNoDash`.  Alternatively, the same
+		// thing can be accomplished by naming the key,
+		// `social.security.number.nodash`.
 		'social.security.number': {
 			8: 'strNoDash(ctx.identity.ssn)'
 		}
