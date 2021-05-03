@@ -1,4 +1,3 @@
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const simple = require('simple-mock');
@@ -65,10 +64,10 @@ describe('map', () => {
 
 		expect(fs.promises.writeFile.calls).to.have.length(3);
 		expect(fs.promises.writeFile.calls[0].args[0])
-			.to.equal(`foo-map.yaml`);
+			.to.equal('foo-map.yaml');
 		expect(fs.promises.writeFile.calls[1].args[0])
-			.to.equal(`foo-example-script.yaml`);
+			.to.equal('foo-example-script.yaml');
 		expect(fs.promises.writeFile.calls[2].args[0])
-			.to.equal(`foo-example-config.yaml`);
+			.to.equal('foo-example-config.yaml');
 	});
 });
