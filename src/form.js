@@ -28,7 +28,7 @@ class Form {
 		try {
 			this.config = await loadYAML(config);
 		} catch (ex) {
-			throw new Error(`Invalid YAML "${config}": ${ex}`)
+			throw new Error(`Invalid config YAML "${config}": ${ex}`);
 		}
 		this.ctx = {
 			...this.config,
@@ -61,7 +61,11 @@ class Form {
 		// TODO: check `source` exists
 		this.formName = path.basename(source, '.pdf');
 		this.sourcePdf = source;
-		this.map = await loadYAML(map);
+		try {
+			this.map = await loadYAML(map);
+		} catch (ex) {
+			throw new Error(`Invalid map YAML "${map}": ${ex}`);
+		}
 		this.setFormName(this.formName);
 	}
 

@@ -7,7 +7,7 @@ const { map, Form } = require('../');
 
 const examplePdf = path.join('example', 'f1040.pdf');
 const mapFile = path.join('example', 'f1040-map.yaml');
-const fillerFile = path.join('example', 'f1040-filler.yaml');
+const fillerFile = path.join('example', 'f1040-script.yaml');
 const configFile = path.join('example', 'config.yaml');
 const outputPdf = path.join('example', 'example.pdf');
 

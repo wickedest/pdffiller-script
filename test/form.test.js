@@ -415,7 +415,7 @@ describe('form', () => {
 			expect.fail('Unexpected');
 		} catch (ex) {
 			expect(ex.message)
-				.to.equal('ENOENT: no such file or directory, access \'missing.yaml\'');
+				.to.equal('Invalid config YAML "missing.yaml": Error: ENOENT: no such file or directory, access \'missing.yaml\'');
 		}
 	});
 
