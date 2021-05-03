@@ -4,6 +4,7 @@ const util = require('util');
 const chalk = require('chalk');
 const pdfFiller = require('pdffiller');
 const YAML = require('js-yaml');
+const execFile = require('child_process').execFile;
 const getHelpers = require('./helpers');
 
 const { promises: afs } = fs;
@@ -14,6 +15,13 @@ pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatte
  * Creates a fillable form from a PDF.
  */
 class Form {
+	/**
+	 * Initialize the form.  The `config` be a string or an object.  If it is
+	 * a string, it is a path to a YAML file.
+	 *
+	 * @param {string|object} config - The config file to use when filling
+	 * forms.
+	 */
 	async init(config) {
 		ensureNotUsingReservedKeys(config);
 		this.config = await loadYAML(config);
@@ -32,14 +40,14 @@ class Form {
 	}
 
 	/**
-	 * Initialize the form.  The `map` and `config` can be a string or an
-	 * object.  If it is a string, then it will be read in as a YAML file.
-	 * The `map` was previously generated from a PDF document using the
-	 * {@link map} function.
+	 * Loads a PDF source and map file.  The `source` is a path to a PDF file
+	 * that will be used to fill.  The `map` can be a string or an object.  If
+	 * it is a string, it is a path to a YAML file.  The `map` was previously
+	 * generated from a PDF document using the {@link map} function.
 	 *
 	 * @param {string} source - The PDF source.
 	 * @param {string|object} map - The map generated from {@link map}.
-	 * @param {string|object} config - The config used by the filler script.
+	 *
 	 * @public
 	 * @async
 	 */
@@ -48,21 +56,50 @@ class Form {
 		this.formName = path.basename(source, '.pdf');
 		this.sourcePdf = source;
 		this.map = await loadYAML(map);
+		this.setFormName(this.formName);
+	}
+
+	/**
+	 * Change the context reference name for the form.  By default is is the
+	 * `path.basename` of the `source` PDF provided in {@link load} function.
+	 * When evaluating form fields, inputs will be saved under this new name,
+	 * and can be referenced from the scripts.
+	 *
+	 * @param {string} name - A friendly form name.
+	 *
+	 * @example
+	 * await form.load(path.join('forms', 'banana-order-form.pdf'));
+	 * form.setFormName('banana');
+	 * // reference in scripts: ctx.forms["banana"]
+	 *
+	 * @public
+	 */
+	setFormName(name) {
+		this.formName = name;
 		this.ctx.forms[this.formName] = {};
-		// this.helpers = getHelpers();
-		// this.helperNames = this.helpers.map(a => a.name);
-		// this.ctx = {
-		// 	...this.config,
-		// 	forms: {
-		// 		[this.formName]: {}
-		// 	}
-		// };
-		// this.registerFriendlyKeyHelpers({
-		// 	'.currency': this.helpers[0], // currency
-		// 	'.dec': this.helpers[1], // currencyDec
-		// 	'.whole': this.helpers[2], // currencyWhole
-		// 	'.nodash': this.helpers[5] // strNoDash
-		// });
+	}
+
+	/**
+	 * Change the source PDF name.  By default, this is the the `source` PDF
+	 * path provided in {@link load} function.  It allows the source PDF to be
+	 * changed prior to calling {@link slice} or {@link save}.
+	 *
+	 * @param {string} source - The PDF source.
+	 *
+	 * @example
+	 * await form.load(path.join('forms', 'A.pdf'));
+	 * await form.fill(script); // fill A
+	 * form.setSourcePDF('A-part2.pdf'); // change source PDF
+	 * await form.slice(3, 4', 'A2.pdf'); // slice pages 3-4 into A2.pdf
+	 * form.setFormName('A2');
+	 * await form.fill(script2); // fill A2
+	 * form.setSourcePDF('A.pdf'); // change source PDF back to A.pdf
+	 * await form.join([ 'A2.pdf' ], 'A.pdf');
+	 *
+	 * @public
+	 */
+	setSourcePDF(source) {
+		this.sourcePdf = source;
 	}
 
 	/**
@@ -73,7 +110,14 @@ class Form {
 	 */
 	/**
 	 * Registers friendly key helpers for use with the script.
+	 *
 	 * @param {object} funcs - A map of function suffix to {@link HelperFunction}.
+	 * @example
+	 * form.registerFriendlyKeyHelpers({
+	 *   '.lowercase': (value) => value !== undefined ? value.toLowerCase() : ''
+	 * });
+	 *
+	 * @public
 	 */
 	registerFriendlyKeyHelpers(funcs) {
 		if (!this.endsWithFuncs) {
@@ -91,42 +135,50 @@ class Form {
 	 * string, then it will be read in as a YAML file.
 	 *
 	 * @param {string|object} filler - The form filler script.
+	 * @param {object} [options = {}] - Fill options.
+	 * @param {string} [options.debug] - Enables a `debugger` breakpoint when
+	 * the specified field name is being filled.  Useful for debugging a
+	 * problematic input field.
+	 *
 	 * @public
 	 * @async
 	 */
-	async fill(filler) {
+	async fill(filler, options = {}) {
 		filler = await loadYAML(filler);
 		for (const friendlyKey in filler) {
 			let fieldId;
 			let fieldIndex;
 			let fillValue;
-			log('field: ', chalk.blue(friendlyKey));
+
+			log(chalk.blue(friendlyKey));
 
 			if (filler[friendlyKey].value) {
-				log('  type: calculate');
-				// this is a calculation. first, compute the value
+				// calculation. first, compute the value
 				const value = this.evalTemplate(
 					this.ctx, filler[friendlyKey].value);
-				log('  calculate value:', value);
 
-				// run through calculate function
+				// run calculate
 				const { field, fill } = this.evalCalculate(
 					this.ctx, filler[friendlyKey].calculate, value);
-
-				log('  calculated:', { field, fill });
 
 				fieldIndex = field;
 				fieldId = findField(this.map, fieldIndex);
 				fillValue = fill;
 			} else {
-				log('  type: fixed-field');
+				// fixed-field
 				const ids = Object.keys(filler[friendlyKey]);
 				if (ids.length !== 1) {
 					throw new Error(`${friendlyKey} has more than 1 field to fill`);
 				}
 				fieldIndex = ids[0];
-				log('  index id:', chalk.blue(fieldIndex));
 				fieldId = findField(this.map, fieldIndex);
+
+				if (options.debug) {
+					if (friendlyKey === options.debug) {
+						debugger;
+					}
+				}
+
 				fillValue = this.evalTemplate(
 					this.ctx, filler[friendlyKey][fieldIndex]);
 			}
@@ -134,51 +186,119 @@ class Form {
 				throw new Error(`failed to find field index '${fieldIndex}' in field map`);
 			}
 
-			for (const key in this.endsWithFuncs) {
-				if (friendlyKey.endsWith(key)) {
-					fillValue = this.endsWithFuncs[key](fillValue);
-				}
-			}
-
-			// if (fillValue === 'NaN') {
-			// 	throw new Error(`got NaN from ${friendlyKey}`);
-			// }
-
-			log('input', chalk.cyan(friendlyKey), '=>',
+			log('  input', chalk.cyan(friendlyKey), '=>',
 				chalk.cyan(fieldIndex), '=>', chalk.cyan(fieldId));
 
-			fillFormField(this.ctx, this.formName, friendlyKey, fieldId, fillValue);
+			this.fillFormField(
+				this.ctx, this.formName, friendlyKey, fieldId, fillValue);
 		}
 	}
 
 	/**
-	 * Opens the PDF `source` form, fills out the form and writes it to
-	 * `dest`.
+	 * Opens the PDF `source` form, fills out the form and writes it to `dest`.
 	 *
 	 * @param {string} source - The source PDF document.
 	 * @param {string} dest - The dest PDF document.
+	 *
 	 * @public
 	 * @async
 	 */
 	async save(dest) {
 		log('fill', { source: this.sourcePdf, dest });
 		const filled = this.ctx.forms[this.formName];
+		for (const key in filled) {
+			if (filled[key] === null) {
+				// fix null values (maybe delete?)
+				filled[key] = '';
+			}
+		}
 		return pdfFiller.fillFormWithFlattenAsync(
 			this.sourcePdf, dest, filled, false);
+	}
+
+	/**
+	 * Copy pages out of the PDF and saves it to `dest`.  Can be used in
+	 * conjunction with {@link setSourcePDF} to change the source PDF used
+	 * for slicing pages.
+	 *
+	 * @param {integer} begin - The page number to slice from, inclusive.
+	 * @param {integer} end - The page number to slice to, inclusive.
+	 * @param {string} dest - The destination PDF file to write.
+	 *
+	 * @public
+	 * @async
+	 */
+	async slice(begin, end, dest) {
+		const pages = (begin === end - 1) ? `${begin}` : `${begin}-${end-1}`;
+
+		// FIXME: This interface can be improved by having an `options` to
+		// change the source PDF.  Either that, or require a separate Form
+		// be used for slicing.
+
+		return new Promise((resolve, reject) => {
+			// pdftk /forms/2018/f8938.pdf cat 1-2 3-end output out.pdf
+			const args = [
+				this.sourcePdf,
+				'cat',
+				pages,
+				'output',
+				dest
+			];
+			log(`pdftk`, ...args);
+			execFile('pdftk', args, (error, stdout, stderr) => {
+				if (error) {
+					return reject(error);
+				}
+				resolve();
+			});
+		});
+	}
+
+	/**
+	 * Join multiple PDF `parts` into a new PDF `dest`.
+	 *
+	 * @param {string[]} parts - PDF file name parts to join.
+	 * @param {string} dest - The destination PDF file to write.
+	 *
+	 * @public
+	 * @async
+	 */
+	async join(parts, dest) {
+		return new Promise((resolve, reject) => {
+			// pdftk /forms/2018/f8938.pdf cat 1-2 3-end output out.pdf
+			const args = [
+				...parts,
+				'cat',
+				'output',
+				dest
+			];
+			log(`pdftk`, ...args);
+			execFile('pdftk', args, (error, stdout, stderr) => {
+				if (error) {
+					return reject(error);
+				}
+				resolve();
+			});
+		});
 	}
 
 	/**
 	 * @private
 	 */
 	evalTemplate(data, template) {
-		log('evalTemplate', template);
 		const validator = {
 			get(target, key) {
-				if (typeof target[key] === 'object' && target[key] !== null) {
+				if (target[key] !== null && typeof target[key] === 'object') {
 					return new Proxy(target[key], validator);
 				} else {
 					if (!Reflect.has(target, key)) {
-						return '';
+						if (data.forms === target) {
+							// This is a missing form
+							return {};
+						}
+						// By returning `null`, as opposed to `undefined`, js can handle
+						// things like `1234 + null = 1234`
+						return null;
 					}
 					return target[key];
 				}
@@ -187,14 +307,11 @@ class Form {
 		const proxyCtx = new Proxy(data, validator);
 
 		try {
-			const fn = new Function(
-				'ctx',
-				...this.helperNames,
-				'return `' + template + '`;'
-			);
-			return fn.call(null, proxyCtx, ...this.helpers) || '';
+			const fn = new Function(...this.helperNames, `return (ctx) => ${template}`);
+			const result = fn.call(null, ...this.helpers)(proxyCtx);
+			return result;
 		} catch (ex) {
-			log(`error with template: ${template}`, ex);
+			log(chalk.red(`error with template: ${template}`));
 			throw ex;
 		}
 	}
@@ -203,7 +320,7 @@ class Form {
 	 * @private
 	 */
 	evalCalculate(data, template, value) {
-		log('evalCalculate', template);
+		log(chalk.grey('  evalCalculate:', template, `, value=${JSON.stringify(value)}`));
 		try {
 			const fn = new Function(...this.helperNames, `return ${template}`);
 			const result = fn.call(null, ...this.helpers)(data, value);
@@ -211,7 +328,7 @@ class Form {
 			if (typeof result !== 'object'
 				|| result.field === undefined
 				|| result.fill === undefined) {
-				log('invalid calculate return value', template);
+				log('  invalid calculate return value', template);
 				throw new Error('calculate functions should return an object: { field, fill }');
 			}
 
@@ -220,6 +337,34 @@ class Form {
 			log(chalk.red(`error with template: ${template}`));
 			throw ex;
 		}
+	}
+
+	/**
+	 * @private
+	 */
+	fillFormField(ctx, formName, friendlyKey, fieldId, value) {
+		let convertedValue = value;
+		let persistedValue = value;
+		for (const key in this.endsWithFuncs) {
+			if (friendlyKey.endsWith(key)) {
+				// auto-convert
+				convertedValue = this.endsWithFuncs[key](value);
+				break;
+			}
+		}
+		if (convertedValue === null || convertedValue === undefined) {
+			convertedValue = '';
+		}
+
+		// Fill the form field with the converted value
+		ctx.forms[formName][fieldId] = convertedValue;
+		log(`[${chalk.green(formName)}] ${chalk.green(fieldId)} =`,
+			chalk.green(JSON.stringify(convertedValue)));
+
+		// Also fill the friendly key with the persisted value
+		ctx.forms[formName][friendlyKey] = persistedValue;
+		log(`[${chalk.green(formName)}] ${chalk.green(friendlyKey)} =`,
+			chalk.green(JSON.stringify(persistedValue)));
 	}
 }
 
@@ -232,19 +377,6 @@ function findField(map, fieldIndex) {
 			return fieldId;
 		}
 	}
-}
-
-/**
- * @private
- */
-function fillFormField(ctx, formName, friendlyKey, fieldId, value) {
-	// Fill the form field with the value
-	ctx.forms[formName][fieldId] = value;
-	log(`filling ctx.forms['${chalk.yellow(formName)}']['${chalk.yellow(fieldId)}'] = '${value}'`);
-
-	// Also fill the friendly key
-	ctx.forms[formName][friendlyKey] = value;
-	log(`filling ctx.forms['${chalk.yellow(formName)}']['${chalk.yellow(friendlyKey)}'] = '${value}'`);
 }
 
 /**

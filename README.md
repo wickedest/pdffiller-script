@@ -1,6 +1,6 @@
 # pdffiller-script
 
-Scripted PDF form filling.
+Scripted PDF form filling.  This project is inspired by [pdffiller](https://github.com/pdffillerjs/pdffiller), but wanted something more powerful and flexible to allow filling out many forms from a single TODO...
 
 ## Install
 
@@ -12,7 +12,7 @@ $ npm install pdffiller-script
 
 ## CLI usage
 
-### Generate map file and examples
+### Generate map file and example YAML files
 
 Parse the PDF and generate the map file, and example files to aid in form filling:
 
@@ -89,4 +89,4 @@ It has a dependency on the [PDF Toolkit](http://www.pdflabs.com/tools/pdftk-the-
 
 ## API
 
-The [Quick Start](docs/README.md) and API can be found in [docs](docs/API.md).
+Documentation on the filler-script is found in the [docs](docs/README.md).  There is a programmatic API that can be found in [docs](docs/API.md).

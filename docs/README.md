@@ -131,6 +131,16 @@ fill.number.dec:
   0: 1234.00
 ```
 
+### Suffix *.nodash
+
+If the friendly key ends with `.nodash`, then the value will automatically be stripped of any `-` dash characters.
+
+```yaml
+fill.number.dec:
+  # fills "1234"
+  0: 12-34
+```
+
 ## Script helper functions
 
 ### currency(number)

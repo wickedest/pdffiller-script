@@ -31,7 +31,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				0: 'New York'
+				0: '"New York"'
 			}
 		};
 		const expected = {
@@ -60,7 +60,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				0: '${ctx.city}'
+				0: 'ctx.city'
 			}
 		};
 		const expected = {
@@ -89,7 +89,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				0: '${strNoDash(strCapitalize(ctx.city))}'
+				0: 'strNoDash(strCapitalize(ctx.city))'
 			}
 		};
 		const expected = {
@@ -118,11 +118,11 @@ describe('form', () => {
 		};
 		const filler = {
 			'fill_city.nodash': {
-				0: '${ctx.city}'
+				0: 'ctx.city'
 			}
 		};
 		const expected = {
-			'fill_city.nodash': 'dublin',
+			'fill_city.nodash': 'd-u-b-l-i-n',
 			'form[0].city.input[0]': 'dublin'
 		};
 
@@ -147,11 +147,11 @@ describe('form', () => {
 		};
 		const filler = {
 			'fill_city.upper': {
-				0: '${ctx.city}'
+				0: 'ctx.city'
 			}
 		};
 		const expected = {
-			'fill_city.upper': 'DUBLIN',
+			'fill_city.upper': 'dublin',
 			'form[0].city.input[0]': 'DUBLIN'
 		};
 
@@ -179,7 +179,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				value: '${ctx.city}',
+				value: 'ctx.city',
 				calculate: `(ctx, value) => {
 					if (value === 'Dublin') {
 						return {
@@ -216,7 +216,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				value: '${ctx.city}',
+				value: 'ctx.city',
 				calculate: `(ctx, value) => {
 					if (value === 'Dublin') {
 						return {
@@ -253,7 +253,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				0: '${ctx.unknown}'
+				0: 'ctx.unknown'
 			}
 		};
 		const expected = {
@@ -284,7 +284,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				0: '${ctx.location.city}'
+				0: 'ctx.location.city'
 			}
 		};
 		const expected = {
@@ -313,7 +313,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				value: '${ctx.city}',
+				value: 'ctx.city',
 				calculate: `(ctx, value) => {
 					return 'Invalid';
 				}`
@@ -341,7 +341,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				5: '${strNoDash(strCapitalize(ctx.city))}'
+				5: 'strNoDash(strCapitalize(ctx.city))'
 			}
 		};
 
@@ -366,7 +366,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				0: '${strNoDash(strCapitalize(ctx.city))}',
+				0: 'strNoDash(strCapitalize(ctx.city))',
 				1: 'Bad'
 			}
 		};
@@ -392,7 +392,7 @@ describe('form', () => {
 		};
 		const filler = {
 			fill_city: {
-				0: '${badFunc(ctx.city)}'
+				0: 'badFunc(ctx.city)'
 			}
 		};
 
@@ -436,5 +436,34 @@ describe('form', () => {
 			expect(ex.message)
 				.to.include('end of the stream or a document');
 		}
+	});
+
+	it('should fill a form using .whole helper function, persisting the converted value in the form and not converting the unmodified value', async () => {
+		const config = {
+			total: 1234
+		};
+		const map = {
+			'form[0].amount.input[0]': '0'
+		};
+		const filler = {
+			'fill_amount.whole': {
+				0: 'ctx.total'
+			}
+		};
+		const expected = {
+			'fill_amount.whole': 1234,
+			'form[0].amount.input[0]': '1,234'
+		};
+
+		const form = new Form();
+		await form.init(config);
+		await form.load('foo.pdf', map);
+		await form.fill(filler);
+		await form.save('dest.pdf');
+
+		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+			.to.have.length(1);
+		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
+			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 });

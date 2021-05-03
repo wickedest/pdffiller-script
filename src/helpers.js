@@ -17,9 +17,12 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currency(number) {
-		log(`  currency(${number})`);
+		log(chalk.grey(`  currency(${JSON.stringify(number)})`));
 		if (number === undefined) {
 			return '0.00';
+		}
+		if (typeof number === 'string') {
+			number = parseCurrency(number);
 		}
 		return `${formatDecimal.format(number)}`;
 	}
@@ -28,7 +31,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currencyDec(number) {
-		log(`  currencyDec(${number})`);
+		log(chalk.grey(`  currencyDec(${JSON.stringify(number)})`));
 		const cur = currency(number);
 		if (cur === 'NaN') {
 			return cur;
@@ -40,27 +43,29 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function currencyWhole(number) {
-		log(`  currencyWhole(${number})`);
 		if (number === undefined) {
 			return '0';
 		}
 		if (typeof number === 'string') {
 			number = parseCurrency(number);
 		}
-		return `${formatWhole.format(number)}`;
+		const result = `${formatWhole.format(number)}`;
+		log(chalk.grey(`  currencyWhole(${JSON.stringify(number)}) => ${JSON.stringify(result)}`));
+		return result;
 	}
 
 	/**
 	 *
 	 */
 	function parseCurrency(val) {
-		log(`  parseCurrency('${chalk.yellow(val)}')`);
+		log(chalk.grey(`  parseCurrency(${JSON.stringify(val)})`));
 		if (val === undefined || val === null || val === '') {
 			return 0;
 		}
 		if (typeof val !== 'string') {
 			return val;
 		}
+		val = val.trim();
 		if (val.indexOf(fractionSep) >= 0) {
 			// this is a value with a decimal fraction	
 			return parseFloat(val.replace(thousandsSep, ''));
@@ -78,7 +83,7 @@ function getHelpers(config = {}) {
 	 * @return {string} The `val` with the first letter capitalized.
 	 */
 	function strCapitalize(val) {
-		log(`strCapitalize(${val})`);
+		log(chalk.grey(`  strCapitalize(${JSON.stringify(val)})`));
 		if (!val || !val.substr) {
 			return val;
 		}
@@ -90,7 +95,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function strNoDash(val) {
-		log(`strNoDash(${val})`);
+		log(chalk.grey(`  strNoDash(${JSON.stringify(val)})`));
 		if (!val || !val.replace) {
 			return val;
 		}
@@ -101,7 +106,7 @@ function getHelpers(config = {}) {
 	 *
 	 */
 	function strTrim(val) {
-		log(`strTrim(${val})`);
+		log(chalk.grey(`  strTrim(${JSON.stringify(val)})`));
 		if (!val || !val.trim) {
 			return val;
 		}

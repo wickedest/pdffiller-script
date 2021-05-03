@@ -1,6 +1,5 @@
 filing.status:
-  value:
-    ${ctx.filingStatus}
+  value: ctx.filingStatus
   calculate: |
     (ctx, value) => {
       switch (value) {
@@ -8,11 +7,11 @@ filing.status:
           return { field: '0', fill: '1' }
         case 'married filing jointly':
           return { field: '1', fill: '2' }
-        case 'single':
+        case 'married filing separately':
           return { field: '2', fill: '3' }
-        case 'single':
+        case 'head of household':
           return { field: '3', fill: '4' }
-        case 'single':
+        case 'qualifying widow(er)':
           return { field: '4', fill: '5' }
         default:
           throw new Error(`unknown filingStatus: ${value}`);
@@ -20,10 +19,10 @@ filing.status:
     }
 
 your.first.name.and.middle.initial:
-  6: "${ctx.identity.firstName}${ctx.identity.middleName ? ` ${ctx.identity.middleName[0]}` : ''}"
+  6: ctx.identity.firstName + (ctx.identity.middleName ? ` ${ctx.identity.middleName[0]}`:'')
 
 last.name:
-  7: ${ctx.identity.lastName}
+  7: ctx.identity.lastName
 
 social.security.number:
-  8: ${strNoDash(ctx.identity.ssn)}
+  8: strNoDash(ctx.identity.ssn)
