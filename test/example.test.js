@@ -22,11 +22,28 @@ describe('example', () => {
 	});
 
 	it('should generate a map YAML file for the example PDF file', async () => {
+		// simple.mock(child_process, 'execFile').throwWith(new Error('omg'));
+		simple.mock(pdfFiller, 'generatePDFTemplateAsync').resolveWith({
+			key1: 'banana'
+		});
+		simple.mock(fs.promises, 'writeFile').resolveWith();
+
 		await map(examplePdf, { dir: 'example' });
 		expect(fs.existsSync(mapFile)).to.be.true;
+
+		expect(fs.promises.writeFile.calls).to.have.length(1);
+		expect(fs.promises.writeFile.calls[0].args[0])
+			.to.equal('example/f1040-map.yaml');
+		expect(fs.promises.writeFile.calls[0].args[1])
+			.to.equal('key1: \'0\'\n');
+		expect(pdfFiller.generatePDFTemplateAsync.calls).to.have.length(1);
+		expect(pdfFiller.generatePDFTemplateAsync.calls[0].args[0])
+			.to.equal('example/f1040.pdf');
 	});
 
 	it('should fill the example PDF form', async () => {
+		simple.mock(pdfFiller, 'fillFormWithFlattenAsync').resolveWith();
+
 		const expected = {
 			'filing.status': '1',
 			'your.first.name.and.middle.initial': 'Joe A',

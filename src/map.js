@@ -58,7 +58,6 @@ async function map(pdfFile, options = {}) {
 
 		config[`field${i}`] = 'todo';
 	});
-	// log('template', template);
 
 	// write the map to YAML
 	log('writing map', mapFile);

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const simple = require('simple-mock');
 const { expect } = require('chai');
+const pdfFiller = require('pdffiller');
 const { map } = require('../');
 
 const { promises: afs } = fs;
@@ -22,8 +23,12 @@ describe('map', () => {
 	});
 
 	it('should generate only map', async () => {
+		simple.mock(pdfFiller, 'generatePDFTemplateAsync').resolveWith({
+			key1: 'banana'
+		});
 		const tmp = await afs.mkdtemp(path.join(os.tmpdir(), 'pdffiller-engine-'));
 		const cwd = process.cwd();
+
 		try {
 			const file = path.resolve(examplePdf);
 			process.chdir(tmp);
@@ -46,6 +51,13 @@ describe('map', () => {
 	});
 
 	it('should generate map and examples', async () => {
+		simple.mock(pdfFiller, 'generatePDFTemplateAsync').resolveWith({
+			key1: 'banana'
+		});
+		simple.mock(pdfFiller, 'fillFormWithFlattenAsync')
+			.resolveWith();
+		simple.mock(fs.promises, 'writeFile').resolveWith();
+
 		const tmp = await afs.mkdtemp(path.join(os.tmpdir(), 'pdffiller-engine-'));
 		try {
 			await map(examplePdf, {
@@ -54,14 +66,17 @@ describe('map', () => {
 				example: true
 			});
 
-			expect(fs.existsSync(path.join(tmp, 'foo-map.yaml')))
-				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'foo-example-script.yaml')))
-				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'foo-example-config.yaml')))
-				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'foo-example-filled.pdf')))
-				.to.be.true;
+			expect(pdfFiller.generatePDFTemplateAsync.calls).to.have.length(1);
+			expect(pdfFiller.fillFormWithFlattenAsync.calls).to.have.length(1);
+
+			expect(fs.promises.writeFile.calls).to.have.length(3);
+			expect(fs.promises.writeFile.calls[0].args[0])
+				.to.equal(`${tmp}/foo-map.yaml`);
+			expect(fs.promises.writeFile.calls[1].args[0])
+				.to.equal(`${tmp}/foo-example-script.yaml`);
+			expect(fs.promises.writeFile.calls[2].args[0])
+				.to.equal(`${tmp}/foo-example-config.yaml`);
+
 		} finally {
 			await afs.rmdir(tmp, { recursive: true });
 		}
