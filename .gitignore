@@ -4,3 +4,4 @@ node_modules/
 output.pdf
 f1040-example-*.*
 /f1040-map.yaml
+*.tgz

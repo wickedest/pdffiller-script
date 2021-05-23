@@ -59,15 +59,15 @@ The `pdffiller-script` uses [pdffiller](https://www.npmjs.com/package/pdffiller)
 
 For example, take two fields from the [f1040](https://www.irs.gov/pub/irs-pdf/f1040.pdf) form.
 
-![Image of two empty frields from f1040 PDF](./docs/images/f1040-empty-fields.png)
+![Image of two empty frields from f1040 PDF](docs/images/f1040-empty-fields.png)
 
 The two fields actually have these IDs:
 
-![Image of two empty frields from f1040 PDF](./docs/images/f1040-field-ids.png)
+![Image of two empty frields from f1040 PDF](docs/images/f1040-field-ids.png)
 
 These two fields exist on many (if not every) PDF tax form, and they have different keys.  The idea behind `pdffiller-script` will abstract these fields by giving each field in a form a unique integer ID that maps to the actual form fields.  It generates an [example PDF file](#example-filled-pdf) filled with the unique integer IDs so you can visually identify the fields you wish to fill.
 
-![Image of two empty frields from f1040 PDF](./docs/images/f1040-filled-fields.png)
+![Image of two empty frields from f1040 PDF](docs/images/f1040-filled-fields.png)
 
 Then, it becomes *much* easier to keep track of fields, and build a form filler script that is used to dynamically set values in the form.  For example:
 
@@ -90,7 +90,7 @@ lastName: Bloggs
 ```
 After running the script, it will fill the form, and evaluate `${ctx.firstName}` as "Joe A" and assign it to the input field, `topmostSubform[0].Page1[0].f1_02[0]`.  Then, it will do the same for `${ctx.lastName}`, yielding:
 
-![Image of two empty frields from f1040 PDF](./docs/images/f1040-filled-fields-joe-bloggs.png)
+![Image of two empty frields from f1040 PDF](docs/images/f1040-filled-fields-joe-bloggs.png)
 
 It has a dependency on the [PDF Toolkit](http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit). 
 
