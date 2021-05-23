@@ -1,6 +1,6 @@
 {
   "name": "pdffiller-script",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A configurable scripting engine for filling PDF forms.",
   "main": "src/index.js",
   "keywords": [
@@ -29,7 +29,7 @@
     "debug": "^4.3.1",
     "js-yaml": "^3.13.1",
     "pdffiller": "0.0.11",
-    "yargs": "^15.3.1"
+    "yargs": "^17.0.1"
   },
   "devDependencies": {
     "chai": "^4.3.4",
