@@ -1,6 +1,6 @@
 {
   "name": "pdffiller-script",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A configurable scripting engine for filling PDF forms.",
   "main": "src/index.js",
   "keywords": [
@@ -12,6 +12,8 @@
     "email": "jamie.peabody@gmail.com",
     "url": "http://mergely.com"
   },
+  "homepage": "https://github.com/wickedest/pdffiller-script",
+  "bugs": "https://github.com/wickedest/pdffiller-script/issues",
   "license": "ISC",
   "files": [
     "bin",
