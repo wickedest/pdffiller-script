@@ -59,15 +59,15 @@ The `pdffiller-script` uses [pdffiller](https://www.npmjs.com/package/pdffiller)
 
 For example, take two fields from the [f1040](https://www.irs.gov/pub/irs-pdf/f1040.pdf) form.
 
-<img src="/docs/images/f1040-empty-fields.png" alt="Image of two empty fields from f1040 PDF" />
+<img src="./docs/images/f1040-empty-fields.png" alt="Image of two empty fields from f1040 PDF" />
 
 The two fields actually have these IDs:
 
-<img src="/docs/images/f1040-field-ids.png" alt="Image of two empty fields from f1040 PDF" />
+<img src="./docs/images/f1040-field-ids.png" alt="Image of two empty fields from f1040 PDF" />
 
 These two fields exist on many (if not every) PDF tax form, and they have different keys.  The idea behind `pdffiller-script` will abstract these fields by giving each field in a form a unique integer ID that maps to the actual form fields.  It generates an [example PDF file](#example-filled-pdf) filled with the unique integer IDs so you can visually identify the fields you wish to fill.
 
-<img src="/docs/images/f1040-filled-fields.png" alt="Image of two filled fields from f1040 PDF" />
+<img src="./docs/images/f1040-filled-fields.png" alt="Image of two filled fields from f1040 PDF" />
 
 Then, it becomes *much* easier to keep track of fields, and build a form filler script that is used to dynamically set values in the form.  For example:
 
