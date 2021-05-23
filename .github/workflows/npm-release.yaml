@@ -26,6 +26,5 @@ jobs:
       - name: Update dist-tag
         run: |
           npm dist-tag add pdffiller-script@${PKG_VERSION} latest
-          npm dist-tag rm next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
