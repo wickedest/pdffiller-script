@@ -174,6 +174,13 @@ class Form {
 
 			log(chalk.blue(friendlyKey));
 
+			if (options.debug) {
+				if (friendlyKey === options.debug) {
+					// eslint-disable-next-line no-debugger
+					debugger;
+				}
+			}
+
 			if (filler[friendlyKey].value) {
 				// calculation. first, compute the value
 				const value = this.evalTemplate(
@@ -194,13 +201,6 @@ class Form {
 				}
 				fieldIndex = ids[0];
 				fieldId = findField(this.map, fieldIndex);
-
-				if (options.debug) {
-					if (friendlyKey === options.debug) {
-						// eslint-disable-next-line no-debugger
-						debugger;
-					}
-				}
 
 				fillValue = this.evalTemplate(
 					this.ctx, filler[friendlyKey][fieldIndex]);
@@ -252,6 +252,7 @@ class Form {
 	 * @async
 	 */
 	async slice(begin, end, dest) {
+		log('slice', { begin, end, dest });
 		const pages = (begin === end - 1) ? `${begin}` : `${begin}-${end-1}`;
 
 		// FIXME: This interface can be improved by having an `options` to
@@ -287,6 +288,7 @@ class Form {
 	 * @async
 	 */
 	async join(parts, dest) {
+		log('join', { parts, dest });
 		return new Promise((resolve, reject) => {
 			// pdftk /forms/2018/f8938.pdf cat 1-2 3-end output out.pdf
 			const args = [
