@@ -1,6 +1,6 @@
 {
   "name": "pdffiller-script",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A configurable scripting engine for filling PDF forms.",
   "main": "src/index.js",
   "keywords": [
