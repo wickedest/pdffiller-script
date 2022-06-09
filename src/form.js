@@ -181,14 +181,15 @@ class Form {
 				}
 			}
 
+			let calculatedInput;
 			if (filler[friendlyKey].value) {
 				// calculation. first, compute the value
-				const value = this.evalTemplate(
+				calculatedInput = this.evalTemplate(
 					this.ctx, filler[friendlyKey].value);
 
 				// run calculate
 				const { field, fill } = this.evalCalculate(
-					this.ctx, filler[friendlyKey].calculate, value);
+					this.ctx, filler[friendlyKey].calculate, calculatedInput);
 
 				fieldIndex = field;
 				fieldId = findField(this.map, fieldIndex);
@@ -206,7 +207,14 @@ class Form {
 					this.ctx, filler[friendlyKey][fieldIndex]);
 			}
 			if (!fieldId) {
-				throw new Error(`failed to find field index '${fieldIndex}' in field map`);
+				log(this.map);
+				if (filler[friendlyKey].value) {
+					throw new Error(
+						`failed to find calculated field '${fieldIndex}' in script ${this.formName}.yaml > ${friendlyKey} > ${filler[friendlyKey].value}, with input "${calculatedInput}". It could mean that the ${this.formName}-map.yaml file is out of sync with the filler script.`);
+				} else {
+					throw new Error(
+						`failed to find field '${fieldIndex}' in script ${this.formName}.yaml > ${friendlyKey}. It could mean that the ${this.formName}-map.yaml file is out of sync with the filler script.`);
+				}
 			}
 
 			log('  input', chalk.cyan(friendlyKey), '=>',

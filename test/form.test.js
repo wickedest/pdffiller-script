@@ -353,7 +353,7 @@ describe('form', () => {
 			expect.fail('Unexpected');
 		} catch (ex) {
 			expect(ex.message)
-				.to.equal('failed to find field index \'5\' in field map');
+				.to.equal('failed to find field \'5\' in script foo.yaml > fill_city. It could mean that the foo-map.yaml file is out of sync with the filler script.');
 		}
 	});
 
