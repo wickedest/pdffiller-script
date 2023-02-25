@@ -1,6 +1,6 @@
 name: Publish to npm
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       tag:
@@ -37,9 +37,7 @@ jobs:
         run: npm run build --if-present
 
       - name: Tag repo with $DIST_TAG
-        run: |
-          git tag $DIST_TAG
-          git push origin $DIST_TAG
+        run: npm run release
 
       - name: Publish to npm with dist-tag next
         run: npm publish --access public --tag ${{ github.event.inputs.tag }}
