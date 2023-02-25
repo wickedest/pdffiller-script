@@ -29,7 +29,7 @@ describe('integration', async () => {
 			expect(fs.existsSync(path.join(tmp, 'foo-example-filled.pdf')))
 				.to.be.true;
 		} finally {
-			await afs.rmdir(tmp, { recursive: true });
+			await afs.rm(tmp, { recursive: true });
 		}
 	});
 });
