@@ -19,6 +19,12 @@ To install `pdffiller-script` to use the module API.
 $ npm install pdffiller-script
 ```
 
+Install `pdftk`
+
+```bash
+sudo apt-get install pdftk
+```
+
 ## CLI usage
 
 ### Generate map file and example YAML files

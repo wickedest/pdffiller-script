@@ -1,14 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
-const chalk = require('chalk');
-const pdfFiller = require('pdffiller');
-const YAML = require('js-yaml');
-const execFile = require('child_process').execFile;
-const getHelpers = require('./helpers');
+import fs from 'fs';
+import path from 'path';
+import util from 'util';
+import chalk from 'chalk';
+import pdfFiller from 'pdffiller';
+import YAML from 'js-yaml';
+import debug from 'debug';
+import { execFile } from 'child_process';
+import getHelpers from './helpers.js';
 
 const { promises: afs } = fs;
-const log = require('debug')('pdffiller-script');
+const log = debug('pdffiller-script');
+
 pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatten);
 
 /**
@@ -439,4 +441,4 @@ async function loadYAML(filename) {
 	return YAML.safeLoad(await afs.readFile(filename));
 }
 
-module.exports = Form;
+export default Form;

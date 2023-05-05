@@ -1,11 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
-const pdfFiller = require('pdffiller');
-const YAML = require('js-yaml');
+import fs from 'fs';
+import path from 'path';
+import util from 'util';
+import pdfFiller from 'pdffiller';
+import YAML from 'js-yaml';
+import debug from 'debug';
 
 const { promises: afs } = fs;
-const log = require('debug')('pdffiller-script');
+const log = debug('pdffiller-script');
+
 pdfFiller.generatePDFTemplateAsync = util.promisify(pdfFiller.generateFDFTemplate);
 pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatten);
 
@@ -97,6 +99,6 @@ function ensureDirectory(dir) {
 		});
 }
 
-module.exports = {
+export {
 	map
 };

@@ -1,5 +1,5 @@
-const { expect } = require('chai');
-const getHelpers = require('../src/helpers');
+import { expect } from 'chai';
+import getHelpers from '../src/helpers.js';
 
 const [
 	currency,

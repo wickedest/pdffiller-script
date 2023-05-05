@@ -1,5 +1,7 @@
+import Form from './form.js';
+import { map } from './map.js';
 
-module.exports = {
-	Form: require('./form'),
-	map: require('./map').map
+export {
+	Form,
+	map
 };

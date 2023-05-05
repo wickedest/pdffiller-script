@@ -1,5 +1,7 @@
-const chalk = require('chalk');
-const log = require('debug')('pdffiller-script');
+import chalk from 'chalk';
+import debug from 'debug';
+
+const log = debug('pdffiller-script');
 
 function getHelpers(config = {}) {
 	const formatWhole = new Intl.NumberFormat(config.locale || 'en-GB', {
@@ -67,7 +69,7 @@ function getHelpers(config = {}) {
 		}
 		val = val.trim();
 		if (val.indexOf(fractionSep) >= 0) {
-			// this is a value with a decimal fraction	
+			// this is a value with a decimal fraction
 			return parseFloat(val.replace(thousandsSep, ''));
 		} else {
 			// this is a whole value with no decimal fraction
@@ -124,4 +126,4 @@ function getHelpers(config = {}) {
 	];
 }
 
-module.exports = getHelpers;
+export default getHelpers;

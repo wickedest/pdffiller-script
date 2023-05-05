@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { Form } = require('..');
+import { Form } from '../src/index.js';
 
 async function example1() {
 	const form = new Form();

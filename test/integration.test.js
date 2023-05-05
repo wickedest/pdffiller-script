@@ -1,9 +1,9 @@
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const { expect } = require('chai');
-const commandExists = require('command-exists').sync;
-const { map } = require('../');
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
+import { expect } from 'chai';
+import { sync as commandExists } from 'command-exists';
+import { map } from '../src/index.js';
 
 const { promises: afs } = fs;
 const examplePdf = path.join('example', 'f1040.pdf');

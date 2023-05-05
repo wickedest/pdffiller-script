@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const simple = require('simple-mock');
-const { expect } = require('chai');
-const pdfFiller = require('pdffiller');
-const { map } = require('../');
+import fs from 'fs';
+import path from 'path';
+import simple from 'simple-mock';
+import { expect } from 'chai';
+import pdfFiller from 'pdffiller';
+import { map } from '../src/index.js';
 
 const { promises: afs } = fs;
 const examplePdf = path.resolve(path.join('example', 'f1040.pdf'));

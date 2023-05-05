@@ -3,6 +3,7 @@
   "version": "0.1.11",
   "description": "A configurable scripting engine for filling PDF forms.",
   "main": "src/index.js",
+  "type": "module",
   "keywords": [
     "pdf",
     "filler"
@@ -21,26 +22,32 @@
     "docs"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=16"
   },
   "bin": {
     "fill": "bin/fill",
     "map": "bin/map"
   },
   "dependencies": {
-    "chalk": "^4.0.0",
-    "debug": "^4.3.1",
-    "js-yaml": "^3.13.1",
+    "@commitlint/cli": "^17.6.3",
+    "@commitlint/config-conventional": "^17.6.3",
+    "@commitlint/prompt-cli": "^17.6.3",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "chalk": "^5.2.0",
+    "debug": "^4.3.4",
+    "husky": "^8.0.3",
+    "js-yaml": "^3.14.1",
     "pdffiller": "0.0.11",
-    "yargs": "^17.0.1"
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "chai": "^4.3.4",
+    "c8": "^7.13.0",
+    "chai": "^4.3.7",
     "command-exists": "^1.2.9",
-    "eslint": "^7.25.0",
-    "jsdoc-to-markdown": "^7.0.1",
-    "mocha": "^8.3.2",
-    "nyc": "^15.0.1",
+    "eslint": "^8.40.0",
+    "jsdoc-to-markdown": "^8.0.0",
+    "mocha": "^10.2.0",
     "simple-mock": "^0.8.0"
   },
   "nyc": {
@@ -54,6 +61,6 @@
     "build": "npm run build:lint && npm run test && npm run build:doc",
     "build:lint": "eslint .",
     "build:doc": "npx jsdoc2md src/*.js > docs/API.md",
-    "test": "nyc mocha"
+    "test": "c8 mocha"
   }
 }

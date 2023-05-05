@@ -1,17 +1,15 @@
 module.exports = {
 	'env': {
-		'commonjs': true,
-		'es6': true,
-		'node': true,
+		'browser': true,
+		'es2021': true,
 		'mocha': true
 	},
 	'extends': 'eslint:recommended',
-	'globals': {
-		'Atomics': 'readonly',
-		'SharedArrayBuffer': 'readonly'
-	},
+	'overrides': [
+	],
 	'parserOptions': {
-		'ecmaVersion': 2018
+		'ecmaVersion': 'latest',
+		'sourceType': 'module'
 	},
 	'rules': {
 		'indent': [

@@ -1,7 +1,7 @@
-const simple = require('simple-mock');
-const { expect } = require('chai');
-const pdfFiller = require('pdffiller');
-const Form = require('../src/form');
+import simple from 'simple-mock';
+import { expect } from 'chai';
+import pdfFiller from 'pdffiller';
+import Form from '../src/form.js';
 
 describe('form', () => {
 	beforeEach(() => {

@@ -1,9 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const { expect } = require('chai');
-const simple = require('simple-mock');
-const pdfFiller = require('pdffiller');
-const { map, Form } = require('../');
+// const fs = require('fs');
+import fs from 'fs';
+import path from 'path';
+import { expect } from 'chai';
+import simple from 'simple-mock';
+import pdfFiller from 'pdffiller';
+import { map, Form } from '../src/index.js';
 
 const examplePdf = path.join('example', 'f1040.pdf');
 const mapFile = path.join('example', 'f1040-map.yaml');
