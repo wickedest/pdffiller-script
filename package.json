@@ -29,23 +29,24 @@
     "map": "bin/map"
   },
   "dependencies": {
-    "@commitlint/cli": "^17.6.3",
-    "@commitlint/config-conventional": "^17.6.3",
-    "@commitlint/prompt-cli": "^17.6.3",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
     "chalk": "^5.2.0",
     "debug": "^4.3.4",
-    "husky": "^8.0.3",
     "js-yaml": "^3.14.1",
     "pdffiller": "0.0.11",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.6.3",
+    "@commitlint/config-conventional": "^17.6.3",
+    "@commitlint/prompt-cli": "^17.6.3",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "c8": "^7.13.0",
     "chai": "^4.3.7",
     "command-exists": "^1.2.9",
+    "conventional-changelog-conventionalcommits": "^5.0.0",
     "eslint": "^8.40.0",
+    "husky": "^8.0.3",
     "jsdoc-to-markdown": "^8.0.0",
     "mocha": "^10.2.0",
     "simple-mock": "^0.8.0"
