@@ -1,3 +1,5 @@
+# [1.0.0](https://github.com/wickedest/pdffiller-script/compare/v0.1.11...v1.0.0) (2023-05-05)
+
 # 0.1.11
 
 ## Fixes
