@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-const chalk = require('chalk');
-const { Form } = require('..');
+import { Form } from '../src/index.js';
 
 const { argv } = require('yargs')
 	.command(
@@ -51,7 +50,7 @@ form.init(argv.config)
 	.then(() => form.load(argv.source, argv.map))
 	.then(() => form.fill(argv.script))
 	.then(() => form.save(argv.output))
-	.then((result) => {
+	.then(() => {
 		console.log('Done');
 	})
 	.catch((err) => {

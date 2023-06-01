@@ -25,8 +25,8 @@
     "node": ">=16"
   },
   "bin": {
-    "fill": "bin/fill",
-    "map": "bin/map"
+    "fill": "bin/fill.js",
+    "map": "bin/map.js"
   },
   "dependencies": {
     "chalk": "^5.2.0",

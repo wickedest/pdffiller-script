@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-const chalk = require('chalk');
-const engine = require('..');
+import chalk from 'chalk';
+import yargs from 'yargs';
+import { map } from '../src/index.js';
 
-const { argv } = require('yargs')
+const { argv } = yargs(process.argv.slice(2))
 	.command(
 		'* <source> [-o out] [-n name] [--example]',
 		'Generate a form template from a PDF file.',
@@ -38,7 +39,7 @@ const { argv } = require('yargs')
 	.help()
 	.strict();
 
-engine.map(argv.source, {
+map(argv.source, {
 	dir: argv.out,
 	name: argv.name,
 	example: argv.example
