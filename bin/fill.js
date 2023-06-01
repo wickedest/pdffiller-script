@@ -39,7 +39,7 @@ const parser = yargs(process.argv.slice(2))
 				'v', 'version'
 			).alias(
 				'h', 'help'
-			)
+			);
 		}
 	)
 	.help()
