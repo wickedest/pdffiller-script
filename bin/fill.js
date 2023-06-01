@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { Form } from '../src/index.js';
+import yargs from 'yargs';
 
-const { argv } = require('yargs')
+const parser = yargs(process.argv.slice(2))
 	.command(
 		'* <source> [-m map] [-f filler] [-i input] [-o output]',
 		'Fill a PDF form.',
@@ -44,6 +45,7 @@ const { argv } = require('yargs')
 	.help()
 	.strict();
 
+const { argv } = parser;
 const form = new Form();
 
 form.init(argv.config)
