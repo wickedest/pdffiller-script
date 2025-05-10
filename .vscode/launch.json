@@ -1,0 +1,31 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Node - map.js",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"args": [
+				"${workspaceFolder}/../irs-form-filler/src/forms/f1040.pdf"
+			],
+			"program": "${workspaceFolder}/bin/map.js"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Node - Current file",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"args": [
+			],
+			"program": "${file}"
+		}
+	]
+}

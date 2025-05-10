@@ -1,17 +1,12 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import util from 'util';
 import chalk from 'chalk';
-import pdfFiller from 'pdffiller';
 import YAML from 'js-yaml';
 import debug from 'debug';
-import { execFile } from 'child_process';
 import getHelpers from './helpers.js';
+import PDF from './pdf.js';
 
-const { promises: afs } = fs;
 const log = debug('pdffiller-script');
-
-pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatten);
 
 /**
  * Creates a fillable form from a PDF.
@@ -207,6 +202,15 @@ class Form {
 
 				fillValue = this.evalTemplate(
 					this.ctx, filler[friendlyKey][fieldIndex]);
+
+				if (options.allowNaN === false
+					&& (fillValue === undefined || Number.isNaN(fillValue) || fillValue === 'NaN')
+				) {
+					log('failing template:');
+					log(chalk.gray(filler[friendlyKey][fieldIndex]));
+					throw new Error(
+						`NaN evaluating calculated field '${fieldIndex}' in script ${this.formName}.yaml > ${friendlyKey} > ${filler[friendlyKey].value}, with input "${calculatedInput}". It could mean that the ${this.formName}-map.yaml file is out of sync with the filler script.`);
+				}
 			}
 			if (!fieldId) {
 				log(this.map);
@@ -236,7 +240,7 @@ class Form {
 	 * @public
 	 * @async
 	 */
-	async save(dest) {
+	async save(dest, { begin, end, flatten = true } = {}) {
 		log('save', { source: this.sourcePdf, dest });
 		const filled = this.ctx.forms[this.formName];
 		for (const key in filled) {
@@ -245,8 +249,17 @@ class Form {
 				filled[key] = '';
 			}
 		}
-		return pdfFiller.fillFormWithFlattenAsync(
-			this.sourcePdf, dest, filled, false);
+		const pdf = await PDF.open(this.sourcePdf);
+		pdf.fillForm(filled);
+
+		if (begin !== undefined && end !== undefined) {
+			if (flatten) {
+				pdf.form.flatten();
+			}
+			const copied = await pdf.slice(begin - 1, end);
+			return copied.save(dest);
+		}
+		return pdf.save(dest, false);
 	}
 
 	/**
@@ -263,59 +276,47 @@ class Form {
 	 */
 	async slice(begin, end, dest) {
 		log('slice', { begin, end, dest });
-		const pages = (begin === end - 1) ? `${begin}` : `${begin}-${end-1}`;
 
-		// FIXME: This interface can be improved by having an `options` to
-		// change the source PDF.  Either that, or require a separate Form
-		// be used for slicing.
-
-		return new Promise((resolve, reject) => {
-			// pdftk /forms/2018/f8938.pdf cat 1-2 3-end output out.pdf
-			const args = [
-				this.sourcePdf,
-				'cat',
-				pages,
-				'output',
-				dest
-			];
-			log('pdftk', ...args);
-			execFile('pdftk', args, (error) => {
-				if (error) {
-					return reject(error);
-				}
-				resolve();
-			});
-		});
+		const pdf = await PDF.open(this.sourcePdf);
+		// Inputs are 1-based index and inclusive, so 1, 3 should copy pages
+		// 1, 2, and 3. This translates to begin=0 (inclusive) and
+		// end=3 (exclusive). To copy: [0, 1, 2]
+		const copied = await pdf.slice(begin - 1, end);
+		return copied.save(dest);
 	}
 
 	/**
 	 * Join multiple PDF `parts` into a new PDF `dest`.
 	 *
-	 * @param {string[]} parts - PDF file name parts to join.
-	 * @param {string} dest - The destination PDF file to write.
+	 * @param {PDF} dest -
+	 * @param {string[]} parts -
 	 *
 	 * @public
 	 * @async
 	 */
-	async join(parts, dest) {
-		log('join', { parts, dest });
-		return new Promise((resolve, reject) => {
-			// pdftk /forms/2018/f8938.pdf cat 1-2 3-end output out.pdf
-			const args = [
-				...parts,
-				'cat',
-				'output',
-				dest
-			];
-			log('pdftk', ...args);
-			execFile('pdftk', args, (error) => {
-				if (error) {
-					return reject(error);
-				}
-				resolve();
-			});
-		});
+	async join(dest, parts) {
+		if (!parts.length) {
+			return;
+		}
+		const part = parts.shift();
+		const pdf = await PDF.open(part);
+
+		for (const fname of parts) {
+			log('join', { part: fname });
+			const partPdf = await PDF.open(fname);
+			await pdf.append(partPdf);
+		}
+		return pdf.save(dest);
 	}
+
+	// async append(parts, dest, { pages = null }) {
+	// 	for (const part of parts) {
+	// 		const pdf = await PDF.open(part);
+	// 		const [begin, end] = pages;
+	// 		const subsetPdf = pdf.slice(begin, end);
+	// 		await pdf.append(partPdf);
+	// 	}
+	// }
 
 	/**
 	 * @private
@@ -437,8 +438,8 @@ async function loadYAML(filename) {
 		// not a filename
 		return filename;
 	}
-	await afs.access(filename, fs.constants.R_OK);
-	return YAML.safeLoad(await afs.readFile(filename));
+	await fs.access(filename, fs.constants.R_OK);
+	return YAML.safeLoad(await fs.readFile(filename));
 }
 
 export default Form;

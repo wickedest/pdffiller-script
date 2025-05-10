@@ -1,8 +1,6 @@
 # pdffiller-script
 
-Scripted PDF form filling.  This project is inspired by [pdffiller](https://github.com/pdffillerjs/pdffiller), but needed something more powerful and flexible to allow filling out many forms with data from a single input configuration file, but also allowing values to be manipulated / computed before form filling.  For example, to combine first and last names, or to ensure currency values look like currency values.
-
-This `pdffiller-script` depends on [pdffiller](https://www.npmjs.com/package/pdffiller) and has a dependency on the [PDF Toolkit](http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit).
+Scripted PDF form filling.  This project is inspired by [pdffiller](https://github.com/pdffillerjs/pdffiller), but needed something more powerful and flexible to allow filling out many forms with data from a single input configuration file, but also allowing values to be manipulated / computed before form filling.  For example, to combine first and last names, or to ensure currency values look like currency values. This module now uses [@cantoo/pdf-lib](https://github.com/cantoo-scribe/pdf-lib) to manipulate PDF forms.
 
 ```yaml
 your.first.name.and.middle.initial:

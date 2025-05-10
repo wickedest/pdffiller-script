@@ -1,6 +1,6 @@
 {
   "name": "pdffiller-script",
-  "version": "1.0.1",
+  "version": "2.0.0-0",
   "description": "A configurable scripting engine for filling PDF forms.",
   "main": "src/index.js",
   "type": "module",
@@ -29,10 +29,10 @@
     "map": "bin/map.js"
   },
   "dependencies": {
+    "@cantoo/pdf-lib": "^2.4.0",
     "chalk": "^5.2.0",
     "debug": "^4.3.4",
     "js-yaml": "^3.14.1",
-    "pdffiller": "0.0.11",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

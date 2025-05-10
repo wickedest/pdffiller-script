@@ -1,15 +1,10 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import util from 'util';
-import pdfFiller from 'pdffiller';
 import YAML from 'js-yaml';
 import debug from 'debug';
+import PDF from './pdf.js';
 
-const { promises: afs } = fs;
 const log = debug('pdffiller-script');
-
-pdfFiller.generatePDFTemplateAsync = util.promisify(pdfFiller.generateFDFTemplate);
-pdfFiller.fillFormWithFlattenAsync = util.promisify(pdfFiller.fillFormWithFlatten);
 
 const instructions = [
 	'# The `friendly.key.name.N` can be customized to whatever you want.  The keys',
@@ -45,8 +40,10 @@ async function map(pdfFile, options = {}) {
 	await ensureDirectory(dir);
 
 	// extract the template from PDF
-	log('calling generatePDFTemplateAsync', pdfFile);
-	const template = await pdfFiller.generatePDFTemplateAsync(pdfFile, null);
+	log('opening PDF file:', pdfFile);
+
+	const pdfDoc = await PDF.open(pdfFile)
+	const template = pdfDoc.getTemplate();
 
 	// fill a form, mapping each input ID `key` to a unique index `i`
 	const filled = [ ...instructions ];
@@ -63,21 +60,23 @@ async function map(pdfFile, options = {}) {
 
 	// write the map to YAML
 	log('writing map', mapFile);
-	await afs.writeFile(mapFile, YAML.safeDump(template));
+	await fs.writeFile(mapFile, YAML.safeDump(template));
 
 	if (options.example) {
 		// write the example filler script file
 		log('writing script', scriptFile);
-		await afs.writeFile(scriptFile, filled.join('\n'));
+		await fs.writeFile(scriptFile, filled.join('\n'));
 
 		// write the example config file
 		log('writing config', configFile);
-		await afs.writeFile(configFile, YAML.safeDump(config));
+		await fs.writeFile(configFile, YAML.safeDump(config));
 
 		// update the form with each input ID `key` filled as unique index `i`
 		log('calling fillFormWithFlattenAsync', pdfFile);
-		await pdfFiller.fillFormWithFlattenAsync(
-			pdfFile, filledFile, template, false);
+		// await pdfFiller.fillFormWithFlattenAsync(
+		// 	pdfFile, filledFile, template, false);
+		await pdfDoc.fillForm(template, filledFile);
+
 		return {
 			map: mapFile,
 			filled: filledFile,
@@ -92,10 +91,10 @@ async function map(pdfFile, options = {}) {
 
 function ensureDirectory(dir) {
 	log('ensure dir:', dir);
-	return afs.access(dir, fs.constants.R_OK | fs.constants.W_OK)
+	return fs.access(dir, fs.constants.R_OK | fs.constants.W_OK)
 		.catch(() => {
 			log('mkdir:', dir);
-			afs.mkdir(dir);
+			fs.mkdir(dir);
 		});
 }
 
