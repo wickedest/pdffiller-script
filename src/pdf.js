@@ -22,7 +22,7 @@ export default class PDF {
 	 * Opens a PDF form.
 	 *
 	 * @param {string} fileName - The path to the PDF file to open.
-	 * @returns
+	 * @returns {PDF} A PDF for filling.
 	 */
 	static async open(fileName) {
 		log('open', fileName);
@@ -63,7 +63,7 @@ export default class PDF {
 				try {
 					field.setText(filledTemplate[key]);
 				} catch (ex) {
-					if (`${ex}`.indexOf(" must be of type `string`") >= 0) {
+					if (`${ex}`.indexOf(' must be of type `string`') >= 0) {
 						// automatically convert numbers to strings
 						field.setText(`${filledTemplate[key]}`);
 					} else {
@@ -142,8 +142,8 @@ export default class PDF {
 	 * Saves the PDF to file.
 	 *
 	 * @param {str} dest - The destination file name.
-	 * @param {bool=true} flatten - Flattens the PDF form before saving.
-	 * @returns
+	 * @param {bool} [flatten=true] - Flattens the PDF form before saving.
+	 * @returns {Promise}
 	 */
 	async save(dest, flatten = true) {
 		if (flatten) {

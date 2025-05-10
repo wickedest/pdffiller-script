@@ -26,6 +26,22 @@
 			"args": [
 			],
 			"program": "${file}"
-		}
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Mocha Tests",
+			"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+			"env": {
+					"TZ": "UTC",
+					"LOG_LEVEL": "fatal"
+			},
+			"args": [
+					"--no-timeouts",
+					"--colors",
+			],
+			"cwd": "${fileDirname}/..",
+			"internalConsoleOptions": "openOnSessionStart"
+		},
 	]
 }

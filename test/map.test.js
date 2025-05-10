@@ -1,12 +1,22 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import simple from 'simple-mock';
 import { expect } from 'chai';
-import pdfFiller from 'pdffiller';
+import { PDFDocument } from '@cantoo/pdf-lib';
 import { map } from '../src/index.js';
 
-const { promises: afs } = fs;
 const examplePdf = path.resolve(path.join('example', 'f1040.pdf'));
+
+async function mockForm(fieldName) {
+	const doc = await PDFDocument.create();
+	doc.addPage([550, 750]);
+	const form = doc.getForm();
+	const textField = form.createTextField(fieldName);
+	simple.mock(PDFDocument, 'load').resolveWith(doc);
+	simple.mock(fs, 'readFile').resolveWith('bytes');
+	simple.mock(fs, 'writeFile').resolveWith();
+	return textField;
+}
 
 describe('map', () => {
 	afterEach(() => {
@@ -18,7 +28,7 @@ describe('map', () => {
 	});
 
 	it('should fail if the output directory cannot be created', async () => {
-		simple.mock(afs, 'mkdir').throwWith(new Error('omg - errors!'));
+		simple.mock(fs, 'mkdir').rejectWith(new Error('omg - errors!'));
 
 		try {
 			await map('example.pdf', {
@@ -30,44 +40,35 @@ describe('map', () => {
 	});
 
 	it('should generate only map', async () => {
-		simple.mock(fs.promises, 'access').resolveWith();
-		simple.mock(fs.promises, 'writeFile').resolveWith();
-		simple.mock(pdfFiller, 'generatePDFTemplateAsync').resolveWith({
-			key1: 'banana'
-		});
+		mockForm('key1');
+		simple.mock(fs, 'access').resolveWith();
+		simple.mock(fs, 'writeFile').resolveWith();
 
 		await map(examplePdf, { dir: 'banana' });
 
-		expect(fs.promises.access.calls).to.have.length(1);
-		expect(fs.promises.access.calls[0].arg).to.equal('banana');
-		expect(fs.promises.writeFile.calls).to.have.length(1);
-		expect(fs.promises.writeFile.calls[0].arg)
+		expect(fs.access.calls).to.have.length(1);
+		expect(fs.access.calls[0].arg).to.equal('banana');
+		expect(fs.writeFile.calls).to.have.length(1);
+		expect(fs.writeFile.calls[0].arg)
 			.to.equal('banana/f1040-map.yaml');
 	});
 
 	it('should generate map and examples in local directory', async () => {
-		simple.mock(fs.promises, 'access').resolveWith();
-		simple.mock(fs.promises, 'writeFile').resolveWith();
-		simple.mock(pdfFiller, 'generatePDFTemplateAsync').resolveWith({
-			key1: 'banana'
-		});
-		simple.mock(pdfFiller, 'fillFormWithFlattenAsync').resolveWith();
-		simple.mock(fs.promises, 'writeFile').resolveWith();
+		mockForm('key1');
+		simple.mock(fs, 'access').resolveWith();
+		simple.mock(fs, 'writeFile').resolveWith();
 
 		await map(examplePdf, {
 			name: 'foo',
 			example: true
 		});
 
-		expect(pdfFiller.generatePDFTemplateAsync.calls).to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.calls).to.have.length(1);
-
-		expect(fs.promises.writeFile.calls).to.have.length(3);
-		expect(fs.promises.writeFile.calls[0].args[0])
+		expect(fs.writeFile.calls).to.have.length(3);
+		expect(fs.writeFile.calls[0].args[0])
 			.to.equal('foo-map.yaml');
-		expect(fs.promises.writeFile.calls[1].args[0])
+		expect(fs.writeFile.calls[1].args[0])
 			.to.equal('foo-example-script.yaml');
-		expect(fs.promises.writeFile.calls[2].args[0])
+		expect(fs.writeFile.calls[2].args[0])
 			.to.equal('foo-example-config.yaml');
 	});
 });

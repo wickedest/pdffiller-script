@@ -1,12 +1,24 @@
+import fs from 'fs/promises';
 import simple from 'simple-mock';
 import { expect } from 'chai';
-import pdfFiller from 'pdffiller';
+import { PDFDocument } from '@cantoo/pdf-lib';
 import Form from '../src/form.js';
+
+async function mockForm(fieldName) {
+	const doc = await PDFDocument.create();
+	doc.addPage([550, 750]);
+	const form = doc.getForm();
+	const textField = form.createTextField(fieldName);
+	simple.mock(PDFDocument, 'load').resolveWith(doc);
+	simple.mock(fs, 'readFile').resolveWith('bytes');
+	simple.mock(fs, 'writeFile').resolveWith();
+	return textField;
+}
 
 describe('form', () => {
 	beforeEach(() => {
-		simple.mock(pdfFiller, 'fillFormWithFlattenAsync')
-			.resolveWith();
+		simple.mock(fs, 'readFile').resolveWith('bytes');
+		simple.mock(fs, 'writeFile').resolveWith();
 	});
 
 	afterEach(() => {
@@ -25,33 +37,35 @@ describe('form', () => {
 	});
 
 	it('should fill a form using a static value', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
+
 		const config = {};
 		const map = {
 			'form[0].city.input[0]': '0'
 		};
-		const filler = {
+		const script = {
 			fill_city: {
 				0: '"New York"'
 			}
 		};
-		const expected = {
-			'fill_city': 'New York',
-			'form[0].city.input[0]': 'New York'
-		};
 
 		const form = new Form();
 		await form.init(config);
-		await form.load('foo.pdf', map);
-		await form.fill(filler);
+		await form.load('source.pdf', map);
+		await form.fill(script);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('New York');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
 	it('should fill a form using a direct field index', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
+
 		const config = {
 			city: 'Dublin'
 		};
@@ -63,10 +77,6 @@ describe('form', () => {
 				0: 'ctx.city'
 			}
 		};
-		const expected = {
-			'fill_city': 'Dublin',
-			'form[0].city.input[0]': 'Dublin'
-		};
 
 		const form = new Form();
 		await form.init(config);
@@ -74,27 +84,26 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('Dublin');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
 	it('should fill a form using helper functions', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
 		const config = {
-			city: 'd-u-b-l-i-n'
+			city: ' d-u-b-l-i-n '
 		};
 		const map = {
 			'form[0].city.input[0]': '0'
 		};
 		const filler = {
 			fill_city: {
-				0: 'strNoDash(strCapitalize(ctx.city))'
+				0: 'strCapitalize(strTrim(strNoDash(ctx.city)))'
 			}
-		};
-		const expected = {
-			'fill_city': 'Dublin',
-			'form[0].city.input[0]': 'Dublin'
 		};
 
 		const form = new Form();
@@ -103,13 +112,16 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('Dublin');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
-	it('should fill a form using built-in endsWith functions', async () => {
+	it('should fill a form using suffix functions', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
 		const config = {
 			city: 'd-u-b-l-i-n'
 		};
@@ -121,10 +133,6 @@ describe('form', () => {
 				0: 'ctx.city'
 			}
 		};
-		const expected = {
-			'fill_city.nodash': 'd-u-b-l-i-n',
-			'form[0].city.input[0]': 'dublin'
-		};
 
 		const form = new Form();
 		await form.init(config);
@@ -132,13 +140,16 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('dublin');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
-	it('should fill a form using registered endsWith functions', async () => {
+	it('should fill a form using custom suffix functions', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
 		const config = {
 			city: 'dublin'
 		};
@@ -150,10 +161,6 @@ describe('form', () => {
 				0: 'ctx.city'
 			}
 		};
-		const expected = {
-			'fill_city.upper': 'dublin',
-			'form[0].city.input[0]': 'DUBLIN'
-		};
 
 		const form = new Form();
 		form.registerFriendlyKeyHelpers({
@@ -164,13 +171,16 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('DUBLIN');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
 	it('should fill a form using a calculation function', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
 		const config = {
 			city: 'Dublin'
 		};
@@ -190,10 +200,6 @@ describe('form', () => {
 				}`
 			}
 		};
-		const expected = {
-			'fill_city': 'Dublin, Ireland',
-			'form[0].city.input[0]': 'Dublin, Ireland'
-		};
 
 		const form = new Form();
 		await form.init(config);
@@ -201,13 +207,16 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('Dublin, Ireland');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
 	it('should fill a form using a calculation function with helper', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
 		const config = {
 			city: 'Dublin'
 		};
@@ -227,10 +236,6 @@ describe('form', () => {
 				}`
 			}
 		};
-		const expected = {
-			'fill_city': 'DUB',
-			'form[0].city.input[0]': 'DUB'
-		};
 
 		const form = new Form();
 		await form.init(config);
@@ -238,13 +243,16 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('DUB');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
 	it('should update form with empty values when config property is undefined', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
 		const config = {
 			city: 'Dublin'
 		};
@@ -256,10 +264,6 @@ describe('form', () => {
 				0: 'ctx.unknown'
 			}
 		};
-		const expected = {
-			'fill_city': '',
-			'form[0].city.input[0]': ''
-		};
 
 		const form = new Form();
 		await form.init(config);
@@ -267,13 +271,16 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal(undefined);
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
 	it('should update form with values obtained from nested config property', async () => {
+		const textField = await mockForm('form[0].city.input[0]');
 		const config = {
 			location: {
 				city: 'Dublin'
@@ -287,9 +294,33 @@ describe('form', () => {
 				0: 'ctx.location.city'
 			}
 		};
-		const expected = {
-			'fill_city': 'Dublin',
-			'form[0].city.input[0]': 'Dublin'
+
+		const form = new Form();
+		await form.init(config);
+		await form.load('foo.pdf', map);
+		await form.fill(filler);
+		await form.save('dest.pdf');
+
+		expect(PDFDocument.load.calls)
+			.to.have.length(1);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('Dublin');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
+	});
+
+	it('should fill a form using .whole helper function, persisting the converted value in the form and not converting the unmodified value', async () => {
+		const textField = await mockForm('form[0].amount.input[0]');
+		const config = {
+			total: 1234
+		};
+		const map = {
+			'form[0].amount.input[0]': '0'
+		};
+		const filler = {
+			'fill_amount.whole': {
+				0: 'ctx.total'
+			}
 		};
 
 		const form = new Form();
@@ -298,10 +329,12 @@ describe('form', () => {
 		await form.fill(filler);
 		await form.save('dest.pdf');
 
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
+		expect(PDFDocument.load.calls)
 			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
+		expect(PDFDocument.load.lastCall.args)
+			.to.deep.equal([ 'bytes' ]);
+		expect(textField.getText()).to.equal('1,234');
+		expect(fs.writeFile.lastCall.args[0]).to.equal('dest.pdf');
 	});
 
 	it('should fail to fill a form using a calculation function that does not return {field, fill}', async () => {
@@ -420,6 +453,7 @@ describe('form', () => {
 	});
 
 	it('should fail to load a config file that does not parse as YAML', async () => {
+		simple.restore(fs, 'readFile');
 		const form = new Form();
 		try {
 			await form.init('README.md');
@@ -428,34 +462,5 @@ describe('form', () => {
 			expect(ex.message)
 				.to.include('end of the stream or a document');
 		}
-	});
-
-	it('should fill a form using .whole helper function, persisting the converted value in the form and not converting the unmodified value', async () => {
-		const config = {
-			total: 1234
-		};
-		const map = {
-			'form[0].amount.input[0]': '0'
-		};
-		const filler = {
-			'fill_amount.whole': {
-				0: 'ctx.total'
-			}
-		};
-		const expected = {
-			'fill_amount.whole': 1234,
-			'form[0].amount.input[0]': '1,234'
-		};
-
-		const form = new Form();
-		await form.init(config);
-		await form.load('foo.pdf', map);
-		await form.fill(filler);
-		await form.save('dest.pdf');
-
-		expect(pdfFiller.fillFormWithFlattenAsync.calls)
-			.to.have.length(1);
-		expect(pdfFiller.fillFormWithFlattenAsync.lastCall.args)
-			.to.deep.equal([ 'foo.pdf', 'dest.pdf', expected, false ]);
 	});
 });

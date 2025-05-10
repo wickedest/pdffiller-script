@@ -42,7 +42,7 @@ async function map(pdfFile, options = {}) {
 	// extract the template from PDF
 	log('opening PDF file:', pdfFile);
 
-	const pdfDoc = await PDF.open(pdfFile)
+	const pdfDoc = await PDF.open(pdfFile);
 	const template = pdfDoc.getTemplate();
 
 	// fill a form, mapping each input ID `key` to a unique index `i`
@@ -73,8 +73,6 @@ async function map(pdfFile, options = {}) {
 
 		// update the form with each input ID `key` filled as unique index `i`
 		log('calling fillFormWithFlattenAsync', pdfFile);
-		// await pdfFiller.fillFormWithFlattenAsync(
-		// 	pdfFile, filledFile, template, false);
 		await pdfDoc.fillForm(template, filledFile);
 
 		return {
@@ -94,7 +92,7 @@ function ensureDirectory(dir) {
 	return fs.access(dir, fs.constants.R_OK | fs.constants.W_OK)
 		.catch(() => {
 			log('mkdir:', dir);
-			fs.mkdir(dir);
+			return fs.mkdir(dir);
 		});
 }
 

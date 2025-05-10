@@ -12,6 +12,24 @@
 <dt><a href="#map">map(pdfFile, [options])</a> ⇒ <code>object</code></dt>
 <dd><p>Generates a map from a PDF file and saves as YAML.</p>
 </dd>
+<dt><a href="#open">open(fileName)</a> ⇒ <code>PDF</code></dt>
+<dd><p>Opens a PDF form.</p>
+</dd>
+<dt><a href="#getTemplate">getTemplate()</a> ⇒ <code>object</code></dt>
+<dd><p>Gets the form template.</p>
+</dd>
+<dt><a href="#fillForm">fillForm(filledTemplate)</a></dt>
+<dd><p>Fills out a form using <code>filledTemplate</code>.</p>
+</dd>
+<dt><a href="#slice">slice(begin, end)</a> ⇒ <code>PDF</code></dt>
+<dd><p>Slice pages from <code>begin</code> (0-based, inclusive) to <code>end</code> (exclusive).</p>
+</dd>
+<dt><a href="#append">append(pdf)</a></dt>
+<dd><p>Appends PDF to the current PDF.</p>
+</dd>
+<dt><a href="#save">save(dest, [flatten])</a> ⇒ <code>Promise</code></dt>
+<dd><p>Saves the PDF to file.</p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -38,7 +56,7 @@ Creates a fillable form from a PDF.
     * [.fill(filler, [options])](#Form+fill)
     * [.save(source, dest)](#Form+save)
     * [.slice(begin, end, dest)](#Form+slice)
-    * [.join(parts, dest)](#Form+join)
+    * [.join(dest, parts)](#Form+join)
 
 <a name="Form+init"></a>
 
@@ -94,7 +112,7 @@ form.setFormName('banana');
 ### form.setSourcePDF(source)
 Change the source PDF name.  By default, this is the the `source` PDF
 path provided in [load](load) function.  It allows the source PDF to be
-changed prior to calling [slice](slice) or [save](save).
+changed prior to calling [slice](#slice) or [save](#save).
 
 **Kind**: instance method of [<code>Form</code>](#Form)  
 **Access**: public  
@@ -186,7 +204,7 @@ for slicing pages.
 
 <a name="Form+join"></a>
 
-### form.join(parts, dest)
+### form.join(dest, parts)
 Join multiple PDF `parts` into a new PDF `dest`.
 
 **Kind**: instance method of [<code>Form</code>](#Form)  
@@ -194,8 +212,8 @@ Join multiple PDF `parts` into a new PDF `dest`.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| parts | <code>Array.&lt;string&gt;</code> | PDF file name parts to join. |
-| dest | <code>string</code> | The destination PDF file to write. |
+| dest | <code>PDF</code> | - |
+| parts | <code>Array.&lt;string&gt;</code> | - |
 
 <a name="map"></a>
 
@@ -210,6 +228,72 @@ Generates a map from a PDF file and saves as YAML.
 | --- | --- | --- | --- |
 | pdfFile | <code>string</code> |  | The PDF file containing a form. |
 | [options] | <code>object</code> | <code>{}</code> | Options. |
+
+<a name="open"></a>
+
+## open(fileName) ⇒ <code>PDF</code>
+Opens a PDF form.
+
+**Kind**: global function  
+**Returns**: <code>PDF</code> - A PDF for filling.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| fileName | <code>string</code> | The path to the PDF file to open. |
+
+<a name="getTemplate"></a>
+
+## getTemplate() ⇒ <code>object</code>
+Gets the form template.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - A PDF form template.  
+<a name="fillForm"></a>
+
+## fillForm(filledTemplate)
+Fills out a form using `filledTemplate`.
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| filledTemplate | <code>object</code> | 
+
+<a name="slice"></a>
+
+## slice(begin, end) ⇒ <code>PDF</code>
+Slice pages from `begin` (0-based, inclusive) to `end` (exclusive).
+
+**Kind**: global function  
+**Returns**: <code>PDF</code> - The new PDF.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| begin | <code>int</code> | The index of the page to slice from. |
+| end | <code>int</code> | The index of the page to slice to. |
+
+<a name="append"></a>
+
+## append(pdf)
+Appends PDF to the current PDF.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| pdf | <code>PDF</code> | The PDF to append. |
+
+<a name="save"></a>
+
+## save(dest, [flatten]) ⇒ <code>Promise</code>
+Saves the PDF to file.
+
+**Kind**: global function  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| dest | <code>str</code> |  | The destination file name. |
+| [flatten] | <code>bool</code> | <code>true</code> | Flattens the PDF form before saving. |
 
 <a name="HelperFunction"></a>
 

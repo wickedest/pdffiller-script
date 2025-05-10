@@ -1,18 +1,18 @@
 import os from 'os';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import { expect } from 'chai';
-import { sync as commandExists } from 'command-exists';
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import { map } from '../src/index.js';
 
-const { promises: afs } = fs;
+const { expect } = chai;
+chai.use(chaiAsPromised);
+
 const examplePdf = path.join('example', 'f1040.pdf');
 
 describe('integration', async () => {
-	const exists = commandExists('pdftk');
-
-	(exists ? it : it.skip)('should generate map and examples using pdftk', async () => {
-		const tmp = await afs.mkdtemp(path.join(os.tmpdir(), 'pdffiller-engine-'));
+	it('should generate map and examples', async () => {
+		const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'pdffiller-script'));
 		try {
 			await map(examplePdf, {
 				name: 'foo',
@@ -20,16 +20,18 @@ describe('integration', async () => {
 				example: true
 			});
 
-			expect(fs.existsSync(path.join(tmp, 'foo-map.yaml')))
-				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'foo-example-script.yaml')))
-				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'foo-example-config.yaml')))
-				.to.be.true;
-			expect(fs.existsSync(path.join(tmp, 'foo-example-filled.pdf')))
-				.to.be.true;
+			const files = [
+				'foo-map.yaml',
+				'foo-example-script.yaml',
+				'foo-example-config.yaml',
+				'foo-example-filled.pdf'
+			];
+			for (const file of files) {
+				expect(fs.access(path.join(tmp, file), fs.constants.R_OK))
+					.to.be.fulfilled;
+			}
 		} finally {
-			await afs.rmdir(tmp, { recursive: true });
+			await fs.rmdir(tmp, { recursive: true });
 		}
 	});
 });
