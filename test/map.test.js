@@ -63,12 +63,14 @@ describe('map', () => {
 			example: true
 		});
 
-		expect(fs.writeFile.calls).to.have.length(3);
+		expect(fs.writeFile.calls).to.have.length(4);
 		expect(fs.writeFile.calls[0].args[0])
 			.to.equal('foo-map.yaml');
 		expect(fs.writeFile.calls[1].args[0])
 			.to.equal('foo-example-script.yaml');
 		expect(fs.writeFile.calls[2].args[0])
 			.to.equal('foo-example-config.yaml');
+		expect(fs.writeFile.calls[3].args[0])
+			.to.equal('foo-example-filled.pdf');
 	});
 });
