@@ -63,9 +63,18 @@ export default class PDF {
 				try {
 					field.setText(filledTemplate[key]);
 				} catch (ex) {
-					if (`${ex}`.indexOf(' must be of type `string`') >= 0) {
+					const msg = `${ex}`;
+					if (msg.indexOf(' must be of type `string`') >= 0) {
 						// automatically convert numbers to strings
 						field.setText(`${filledTemplate[key]}`);
+					} else if (msg.indexOf('Attempted to set text with length=')) {
+						// the field value is too big for the field. truncate.
+						// TODO: there should probably be two modes. when filling examples
+						// this can happen, but when filling for real, it should error.
+						const matched = /maxLength=(\d+) /.exec(msg);
+						const limit = parseInt(matched[1], 10);
+						const value = `${filledTemplate[key]}`;
+						field.setText(value.slice(0, limit));
 					} else {
 						throw Error(
 							`${ex}, form=${this.name} key=${key}, value="${filledTemplate[key]}"`);

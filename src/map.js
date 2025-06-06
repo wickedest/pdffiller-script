@@ -73,7 +73,9 @@ async function map(pdfFile, options = {}) {
 
 		// update the form with each input ID `key` filled as unique index `i`
 		log('calling fillFormWithFlattenAsync', pdfFile);
-		await pdfDoc.fillForm(template, filledFile);
+		await pdfDoc.fillForm(template);
+
+		await pdfDoc.save(filledFile, false);
 
 		return {
 			map: mapFile,
