@@ -1,3 +1,11 @@
+## [2.0.1](https://github.com/wickedest/pdffiller-script/compare/v2.0.0...v2.0.1) (2025-06-06)
+
+
+### Bug Fixes
+
+* Fixed issue generating mapped values in PDF files where field number exceeds maximum field width ([e8a9a3b](https://github.com/wickedest/pdffiller-script/commit/e8a9a3bb8688454f1467371c10e740ac56888bf2))
+* Fixed unit-test ([e474f2f](https://github.com/wickedest/pdffiller-script/commit/e474f2f3220872a4d2236374082c09fb6df28a02))
+
 # [2.0.0](https://github.com/wickedest/pdffiller-script/compare/v1.0.1...v2.0.0) (2025-05-10)
 
 ## [1.0.1](https://github.com/wickedest/pdffiller-script/compare/v1.0.0...v1.0.1) (2023-06-01)
